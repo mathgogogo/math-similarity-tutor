@@ -175,4 +175,18 @@ elif problem == "2. 직각삼각형 속 직각 (소 공식 체인)":
             axes[1].text(3.0, -0.4, 'C (●)', weight='bold')
             axes[1].text(-0.3, 2.35, 'A (×)', weight='bold')
             axes[1].set_title("2. △HAC (Right)", fontsize=10, color='crimson')
-            axes[1].axis('
+# 2. 오른쪽 작은 삼각형
+            axes[1].plot([0, 3, 0, 0], [0, 0, 2.25, 0], 'crimson', lw=2)
+            axes[1].text(-0.3, -0.4, 'H (90°)', weight='bold')
+            axes[1].text(3.0, -0.4, 'C (●)', weight='bold')
+            axes[1].text(-0.3, 2.35, 'A (×)', weight='bold')
+            axes[1].set_title("2. △HAC (Right)", fontsize=10, color='crimson')
+            axes[1].axis('off')  # <-- 이 줄 끝에 'off')가 제대로 닫혀있는지 확인하세요.
+
+            # 3. 왼쪽 중간 삼각형
+            axes[2].plot([0, 2.25, 0, 0], [0, 0, 1.7, 0], 'darkgreen', lw=2)
+            axes[2].text(-0.3, -0.4, 'H (90°)', weight='bold')
+            axes[2].text(2.25, -0.4, 'A (●)', weight='bold')
+            axes[2].text(-0.3, 1.8, 'B (×)', weight='bold')
+            axes[2].set_title("3. △HBA (Left)", fontsize=10, color='darkgreen')
+            axes[2].axis('off')
