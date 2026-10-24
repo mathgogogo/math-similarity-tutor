@@ -1,192 +1,208 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import numpy as np
+import random
 
-st.set_page_config(page_title="닮음 시각화 훈련소", layout="wide")
-
-st.title("🧩 닮음 정복 훈련: '분리해서 같은 방향으로 돌리기'")
-st.markdown("""
-많은 학생들이 겹쳐 있거나 회전된 그림을 눈으로만 보려다 실수를 합니다.  
-가장 확실한 해결책은 **작은 삼각형을 바깥에 꺼내 큰 삼각형과 똑같은 방향으로 돌려놓는 것**입니다!
-""")
-
-# 훈련 유형 선택
-problem = st.sidebar.radio(
-    "도형 유형을 고르세요:",
-    [
-        "1. 회전형 AA 닮음 (공통각 + 한 각 동일)",
-        "2. 직각삼각형 속 직각 (소 공식 체인)",
-        "3. 맞꼭지각 모래시계형 (나비형)"
-    ]
+# 페이지 설정
+st.set_page_config(
+    page_title="중2 수학 | 도형의 닮음 퀴즈",
+    page_icon="📐",
+    layout="centered"
 )
 
-# -----------------------------------------------------------------------------
-# 유형 1: 회전형 AA 닮음
-# -----------------------------------------------------------------------------
-if problem == "1. 회전형 AA 닮음 (공통각 + 한 각 동일)":
-    st.subheader("유형 1: 큰 삼각형 안에 엇갈려 들어간 작은 삼각형")
-    st.info("💡 **각 A는 공통각(★)**이고, **각 C와 크기가 같은 각(●)은 각 D**입니다. 작은 삼각형을 큰 삼각형 모양(★가 위, ●가 오른쪽 아래)으로 정렬해 보세요.")
-    
-    col_orig, col_sep = st.columns([1, 1.2])
-    
-    with col_orig:
-        st.markdown("#### [원본 문제 도형]")
-        fig, ax = plt.subplots(figsize=(5, 4.5))
-        
-        # 큰 삼각형 ABC 좌표
-        A = np.array([2.5, 5.0])
-        B = np.array([0.0, 0.0])
-        C = np.array([7.0, 0.0])
-        
-        # 선분 AB 위 D, 선분 AC 위 E
-        D = A * 0.45 + B * 0.55
-        E = A * 0.55 + C * 0.45
-        
-        # 도형 선 그리기
-        ax.plot([A[0], B[0], C[0], A[0]], [A[1], B[1], C[1], A[1]], 'b-', lw=2.5)
-        ax.plot([D[0], E[0]], [D[1], E[1]], 'crimson', lw=2.5)
-        
-        # 꼭짓점 라벨 (폰트 깨짐 방지를 위해 기호와 알파벳만 사용)
-        ax.text(A[0], A[1] + 0.25, 'A (★)', fontsize=12, ha='center', weight='bold')
-        ax.text(B[0] - 0.4, B[1] - 0.2, 'B', fontsize=12, weight='bold')
-        ax.text(C[0] + 0.2, C[1] - 0.2, 'C (●)', fontsize=12, color='blue', weight='bold')
-        ax.text(D[0] - 0.45, D[1] + 0.1, 'D (●)', fontsize=12, color='crimson', weight='bold')
-        ax.text(E[0] + 0.2, E[1] + 0.1, 'E', fontsize=12, color='crimson', weight='bold')
-        
-        # 변의 길이
-        ax.text(1.0, 3.2, 'AD = 4', color='gray', fontsize=10)
-        ax.text(0.3, 1.0, 'DB = 5', color='gray', fontsize=10)
-        ax.text(4.5, 3.2, 'AE = 3', color='gray', fontsize=10)
-        ax.text(5.5, 1.0, 'EC = x', color='crimson', fontsize=11, weight='bold')
-        
-        ax.set_xlim(-1, 8)
-        ax.set_ylim(-1, 6)
-        ax.axis('off')
-        st.pyplot(fig)
+# 문제 데이터베이스 (PDF 대단원 평가 14문항 기반)
+QUESTIONS = [
+    {
+        "id": 1,
+        "type": "choice",
+        "category": "항상 닮은 도형",
+        "question": "다음 중에서 항상 서로 닮음인 도형은?",
+        "options": ["① 두 삼각형", "② 두 원기둥", "③ 두 직사각형", "④ 두 삼각뿔", "⑤ 두 정오각형"],
+        "answer": "⑤ 두 정오각형",
+        "explanation": "변의 개수가 같은 정다각형(정오각형 등)이나 모든 원, 구, 정다면체는 항상 서로 닮은 도형입니다."
+    },
+    {
+        "id": 2,
+        "type": "choice",
+        "category": "삼각형의 닮음조건",
+        "question": "△ABC ∽ △DEF 가 되기 위해 만족해야 하는 올바른 조건은?\n(단, 대응점 순서는 A-D, B-E, C-F)",
+        "options": [
+            "① ∠C = 45°, ∠D = 75° (두 각이 같아져 AA 닮음)",
+            "② ∠C = 55°, ∠E = 80°",
+            "③ AB = 6 cm, DE = 8 cm",
+            "④ AC = 12 cm, DF = 16 cm",
+            "⑤ AB = 12 cm, DF = 15 cm"
+        ],
+        "answer": "① ∠C = 45°, ∠D = 75° (두 각이 같아져 AA 닮음)",
+        "explanation": "삼각형의 내각의 합은 180°이므로, 대응하는 두 쌍의 각의 크기가 같아지면 AA 닮음이 성립합니다."
+    },
+    {
+        "id": 3,
+        "type": "choice",
+        "category": "닮은 삼각형 찾기",
+        "question": "직각삼각형 조건에서 세 수선 관계가 주어졌을 때, 다음 중 △ABC와 닮음이 아닌 삼각형은?",
+        "options": ["① △DBE", "② △DEA", "③ △EAC", "④ △EBA", "⑤ △FBD"],
+        "answer": "⑤ △FBD",
+        "explanation": "공통각과 직각(90°) 관계를 이용해 AA 닮음을 따져보면, △FBD는 각의 조건이 일치하지 않아 닮음이 아닙니다."
+    },
+    {
+        "id": 4,
+        "type": "choice",
+        "category": "평행선과 선분의 비",
+        "question": "△ADE에서 BC // DE이다. AB = 3 cm, BD = x cm, BC = 4 cm, DE = 7 cm일 때, x의 값은?",
+        "options": ["① 2", "② 9/4", "③ 15/4", "④ 9/2", "⑤ 14/3"],
+        "answer": "② 9/4",
+        "explanation": "AB : AD = BC : DE 이므로 3 : (3 + x) = 4 : 7 입니다.\n4(3 + x) = 21  ==>  12 + 4x = 21  ==>  4x = 9  ==>  x = 9/4"
+    },
+    {
+        "id": 5,
+        "type": "choice",
+        "category": "평행선과 선분의 길이",
+        "question": "△ABC에서 BC // DE이고, B-Q-C 선분 위 BQ=5 cm, QC=10 cm이다. PE=6 cm일 때, DP의 길이는?",
+        "options": ["① 2 cm", "② 3 cm", "③ 4 cm", "④ 5 cm", "⑤ 6 cm"],
+        "answer": "② 3 cm",
+        "explanation": "평행선 사이의 선분 비에 의해 DP : PE = BQ : QC 가 성립합니다.\nDP : 6 = 5 : 10 = 1 : 2  ==>  DP = 3 cm"
+    },
+    {
+        "id": 6,
+        "type": "choice",
+        "category": "평행사변형과 닮음",
+        "question": "평행사변형 ABCD에서 AB = 4 cm이고, 변 BC 위의 점 E에 대해 BE : EC = 3 : 2이다. 이때 선분 CF의 길이는?",
+        "options": ["① 1 cm", "② 2 cm", "③ 8/3 cm", "④ 3 cm", "⑤ 14/3 cm"],
+        "answer": "③ 8/3 cm",
+        "explanation": "△ABE ∽ △FCE (AA 닮음)이므로 AB : FC = BE : CE 가 성립합니다.\n4 : CF = 3 : 2  ==>  3 * CF = 8  ==>  CF = 8/3 cm"
+    },
+    {
+        "id": 7,
+        "type": "choice",
+        "category": "무게중심과 중점연결",
+        "question": "점 G가 △ABC의 무게중심이고, 중선 및 중점 연결선과의 교점을 P라 할 때, AP / PG 의 값은?",
+        "options": ["① 1", "② 3/2", "③ 5/2", "④ 3", "⑤ 4"],
+        "answer": "④ 3",
+        "explanation": "중점연결정리에 의해 AP = 3등분 단위 중 3에 해당하며, PG = 1에 해당하므로 AP : PG = 3 : 1 입니다. 따라서 AP/PG = 3 입니다."
+    },
+    {
+        "id": 8,
+        "type": "choice",
+        "category": "중점연결정리와 둘레",
+        "question": "점 D, E, F가 각각 △ABC의 변 AB, BC, CA의 중점이다. △ABC의 둘레가 32 cm일 때, △DEF의 둘레는?",
+        "options": ["① 12 cm", "② 16 cm", "③ 24 cm", "④ 32 cm", "⑤ 64 cm"],
+        "answer": "② 16 cm",
+        "explanation": "삼각형의 중점연결정리에 의해 △DEF의 각 변의 길이는 △ABC 각 변의 길이의 1/2입니다.\n따라서 둘레도 32 * (1/2) = 16 cm입니다."
+    },
+    {
+        "id": 9,
+        "type": "choice",
+        "category": "직각삼각형의 닮음 응용",
+        "question": "AB ⊥ BC, DC ⊥ BC, PH ⊥ BC이고 AB = 8 cm, CD = 12 cm일 때, 선분 PH의 길이는?",
+        "options": ["① 3.2 cm", "② 4.8 cm", "③ 5.9 cm", "④ 6.1 cm", "⑤ 7.2 cm"],
+        "answer": "② 4.8 cm",
+        "explanation": "1/PH = 1/AB + 1/CD 공식에 의해,\n1/PH = 1/8 + 1/12 = 5/24  ==>  PH = 24/5 = 4.8 cm입니다."
+    },
+    {
+        "id": 10,
+        "type": "text",
+        "category": "삼각형의 닮음과 변의 길이",
+        "question": "△ABC의 변 AC 위의 점 D, 변 BC 위의 점 E에 대해 ∠BAC = ∠DEC이다.\nAB = 9 cm, DE = 5 cm, BC = 12 cm일 때, 선분 DC의 길이는? (숫자 또는 분수만 입력)",
+        "answer": "20/3",
+        "alt_answers": ["6.67", "6.6", "20/3"],
+        "explanation": "∠C 공통, ∠BAC = ∠DEC이므로 △ABC ∽ △EDC (AA 닮음)입니다.\nAB : ED = BC : DC  ==>  9 : 5 = 12 : DC  ==>  9 * DC = 60  ==>  DC = 60/9 = 20/3 cm"
+    },
+    {
+        "id": 11,
+        "type": "text",
+        "category": "닮음의 실생활 활용",
+        "question": "강 건너편의 폭 PQ를 구하기 위해 측량하였다.\n강폭 PQ ⊥ QB, AB ⊥ QB이고, Q-C-B 일직선상에서 QC = 40 m, CB = 10 m, AB = 5 m일 때, PQ의 길이는 몇 m인가?",
+        "answer": "20",
+        "alt_answers": ["20m", "20"],
+        "explanation": "△PQC ∽ △ABC (AA 닮음)이므로 PQ : AB = QC : BC 입니다.\nPQ : 5 = 40 : 10 = 4 : 1  ==>  PQ = 20 m"
+    },
+    {
+        "id": 12,
+        "type": "text",
+        "category": "무게중심과 사각형의 넓이",
+        "question": "점 E, F가 변 AB, AC의 중점이고 G가 무게중심이다. △ABC의 전체 넓이가 36 cm²일 때, 사각형 AEGF의 넓이는 몇 cm²인가?",
+        "answer": "12",
+        "alt_answers": ["12", "12cm2"],
+        "explanation": "무게중심 G와 세 꼭짓점을 이으면 전체 넓이가 6개(각 6 cm²)로 나누어집니다.\n사각형 AEGF = △AGE + △AGF = 6 + 6 = 12 cm²입니다."
+    },
+    {
+        "id": 13,
+        "type": "text",
+        "category": "평행선과 삼각형 넓이의 비",
+        "question": "AC // DE이고 BE = 6 cm, EC = 4 cm이다. △DBE의 넓이가 18 cm²일 때, 사각형 ADEC의 넓이는 몇 cm²인가?",
+        "answer": "32",
+        "alt_answers": ["32", "32cm2"],
+        "explanation": "△DBE ∽ △ABC에서 닮음비는 BE : BC = 6 : 10 = 3 : 5 입니다.\n넓이의 비는 3² : 5² = 9 : 25이므로, △ABC의 넓이는 18 * (25/9) = 50 cm²입니다.\n따라서 사각형 ADEC = △ABC - △DBE = 50 - 18 = 32 cm²입니다."
+    },
+    {
+        "id": 14,
+        "type": "text",
+        "category": "입체도형 부피의 비",
+        "question": "원뿔 모양의 그릇에 20 cm³의 물을 부었더니 그릇 높이의 1/3만큼 채워졌다.\n이 그릇에 물을 가득 채우기 위해 '더 넣어야 할' 물의 양은 몇 cm³인가?",
+        "answer": "520",
+        "alt_answers": ["520", "520cm3"],
+        "explanation": "채워진 물과 전체 원뿔의 닮음비는 1 : 3입니다.\n부피의 비는 1³ : 3³ = 1 : 27이므로, 전체 부피는 20 * 27 = 540 cm³입니다.\n더 넣어야 할 물의 양 = 전체 부피 - 현재 물의 양 = 540 - 20 = 520 cm³입니다."
+    }
+]
 
-    with col_sep:
-        st.markdown("#### [오른쪽 여백에 분리해서 같은 방향으로 세우기]")
-        
-        align_mode = st.radio(
-            "작은 삼각형의 배치 방식을 선택하세요:",
-            [
-                "그대로 꺼내기 (A 위, D 왼쪽, E 오른쪽)",
-                "뒤집어서 같은 방향 맞추기 (A 위, E 왼쪽, D 오른쪽)"
-            ]
-        )
-        
-        fig2, (ax_L, ax_R) = plt.subplots(1, 2, figsize=(7, 3.5))
-        
-        # 기준 큰 삼각형 ABC
-        ax_L.plot([2, 0, 6, 2], [4, 0, 0, 4], 'b-', lw=2.5)
-        ax_L.text(2, 4.3, 'A (★)', ha='center', weight='bold')
-        ax_L.text(-0.3, -0.3, 'B')
-        ax_L.text(6.2, -0.3, 'C (●)', color='blue', weight='bold')
-        ax_L.text(0.5, 2.0, 'AB = 9')
-        ax_L.text(4.2, 2.0, 'AC = 3+x')
-        ax_L.set_title("Base: △ABC", fontsize=11, weight='bold')
-        ax_L.set_xlim(-1, 7)
-        ax_L.set_ylim(-1, 5)
-        ax_L.axis('off')
-        
-        # 오른쪽 작은 삼각형
-        if align_mode == "그대로 꺼내기 (A 위, D 왼쪽, E 오른쪽)":
-            ax_R.plot([1.5, 0, 4, 1.5], [3, 0, 0, 3], 'gray', lw=2, linestyle='--')
-            ax_R.text(1.5, 3.3, 'A (★)', ha='center', weight='bold')
-            ax_R.text(-0.3, -0.3, 'D (●)', color='crimson', weight='bold')
-            ax_R.text(4.2, -0.3, 'E')
-            ax_R.text(0.3, 1.5, 'AD = 4')
-            ax_R.text(3.0, 1.5, 'AE = 3')
-            ax_R.set_title("Result: Not Aligned", fontsize=11, color='red', weight='bold')
-        else:
-            ax_R.plot([1.5, 0, 4, 1.5], [3, 0, 0, 3], 'crimson', lw=2.5)
-            ax_R.text(1.5, 3.3, 'A (★)', ha='center', weight='bold')
-            ax_R.text(-0.3, -0.3, 'E')
-            ax_R.text(4.2, -0.3, 'D (●)', color='crimson', weight='bold')
-            ax_R.text(0.3, 1.5, 'AE = 3')
-            ax_R.text(3.0, 1.5, 'AD = 4')
-            ax_R.set_title("Result: Aligned (△AED)", fontsize=11, color='green', weight='bold')
-            
-        ax_R.set_xlim(-1, 5)
-        ax_R.set_ylim(-1, 4.5)
-        ax_R.axis('off')
-        st.pyplot(fig2)
-        
-        # 상태에 따른 한글 설명 (Streamlit 텍스트로 처리하여 절대 안 깨짐)
-        if align_mode == "그대로 꺼내기 (A 위, D 왼쪽, E 오른쪽)":
-            st.error("❌ 아직 회전이 맞지 않습니다: 기준 삼각형은 ●가 오른쪽인데, 작은 삼각형은 ●가 왼쪽에 있습니다.")
-        else:
-            st.success("🎯 완벽한 정렬! 기준 도형과 작은 도형의 ★(위), ●(오른쪽 아래) 위치가 완전히 일치합니다.")
-            st.markdown(r"""
-            **대응점 순서 확정:** $\triangle \text{ABC} \sim \triangle \text{AED}$ (AA 닮음)  
-            
-            **대응변 비례식 세우기:**
-            $$\frac{\text{AB}}{\text{AE}} = \frac{\text{AC}}{\text{AD}} \implies \frac{9}{3} = \frac{3+x}{4}$$
-            $$3 = \frac{3+x}{4} \implies 12 = 3+x \implies \mathbf{x = 9}$$
-            """)
+# 세션 상태 초기화
+if "current_q" not in st.session_state:
+    st.session_state.current_q = random.choice(QUESTIONS)
+    st.session_state.submitted = False
+    st.session_state.user_answer = None
 
-# -----------------------------------------------------------------------------
-# 유형 2: 직각삼각형 속 직각
-# -----------------------------------------------------------------------------
-elif problem == "2. 직각삼각형 속 직각 (소 공식 체인)":
-    st.subheader("유형 2: 직각삼각형 꼭짓점에서 내린 수선의 발 (소 공식)")
-    st.info("💡 직각($90^\circ$)과 한 예각(●)을 기준으로, 3개의 직각삼각형을 모두 같은 모양(직각이 왼쪽 아래, ●가 오른쪽 아래)으로 정렬합니다.")
-    
-    col_orig, col_sep = st.columns([1, 1.2])
-    
-    with col_orig:
-        fig, ax = plt.subplots(figsize=(5, 4))
-        A = np.array([0, 2.4])
-        B = np.array([-3.2, 0])
-        C = np.array([1.8, 0])
-        H = np.array([0, 0])
-        
-        ax.plot([B[0], C[0], A[0], B[0]], [B[1], C[1], A[1], B[1]], 'b-', lw=2.5)
-        ax.plot([A[0], H[0]], [A[1], H[1]], 'crimson', lw=2)
-        
-        ax.text(A[0], A[1] + 0.2, 'A (90°)', ha='center', weight='bold')
-        ax.text(B[0] - 0.4, B[1] - 0.2, 'B (×)', weight='bold')
-        ax.text(C[0] + 0.2, C[1] - 0.2, 'C (●)', weight='bold')
-        ax.text(H[0], H[1] - 0.35, 'H (90°)', ha='center', color='crimson', weight='bold')
-        
-        ax.set_xlim(-4, 3)
-        ax.set_ylim(-1, 3.5)
-        ax.axis('off')
-        st.pyplot(fig)
-        
-    with col_sep:
-        st.markdown("#### [세 직각삼각형을 모두 같은 자세로 분리]")
-        show_all = st.checkbox("3개의 직각삼각형 분리해서 보기", value=True)
-        
-        if show_all:
-            fig3, axes = plt.subplots(1, 3, figsize=(8, 2.5))
-            
-            # 1. 전체 큰 삼각형
-            axes[0].plot([0, 4, 0, 0], [0, 0, 3, 0], 'b-', lw=2)
-            axes[0].text(-0.3, -0.4, 'A (90°)', weight='bold')
-            axes[0].text(4.0, -0.4, 'C (●)', weight='bold')
-            axes[0].text(-0.3, 3.1, 'B (×)', weight='bold')
-            axes[0].set_title("1. △ABC (Whole)", fontsize=10)
-            axes[0].axis('off')
-            
-            # 2. 오른쪽 작은 삼각형
-            axes[1].plot([0, 3, 0, 0], [0, 0, 2.25, 0], 'crimson', lw=2)
-            axes[1].text(-0.3, -0.4, 'H (90°)', weight='bold')
-            axes[1].text(3.0, -0.4, 'C (●)', weight='bold')
-            axes[1].text(-0.3, 2.35, 'A (×)', weight='bold')
-            axes[1].set_title("2. △HAC (Right)", fontsize=10, color='crimson')
-# 2. 오른쪽 작은 삼각형
-            axes[1].plot([0, 3, 0, 0], [0, 0, 2.25, 0], 'crimson', lw=2)
-            axes[1].text(-0.3, -0.4, 'H (90°)', weight='bold')
-            axes[1].text(3.0, -0.4, 'C (●)', weight='bold')
-            axes[1].text(-0.3, 2.35, 'A (×)', weight='bold')
-            axes[1].set_title("2. △HAC (Right)", fontsize=10, color='crimson')
-            axes[1].axis('off')  # <-- 이 줄 끝에 'off')가 제대로 닫혀있는지 확인하세요.
+def pick_next_question():
+    st.session_state.current_q = random.choice(QUESTIONS)
+    st.session_state.submitted = False
+    st.session_state.user_answer = None
 
-            # 3. 왼쪽 중간 삼각형
-            axes[2].plot([0, 2.25, 0, 0], [0, 0, 1.7, 0], 'darkgreen', lw=2)
-            axes[2].text(-0.3, -0.4, 'H (90°)', weight='bold')
-            axes[2].text(2.25, -0.4, 'A (●)', weight='bold')
-            axes[2].text(-0.3, 1.8, 'B (×)', weight='bold')
-            axes[2].set_title("3. △HBA (Left)", fontsize=10, color='darkgreen')
-            axes[2].axis('off')
+# 상단 헤더
+st.title("📐 중2 수학: 도형의 닮음 마스터")
+st.caption("대단원 핵심 개념 및 기출 문제 랜덤 퀴즈 훈련 프로그램")
+st.divider()
+
+# 새 문제 뽑기 버튼
+col_top1, col_top2 = st.columns([3, 1])
+with col_top1:
+    st.markdown(f"**[유형] {st.session_state.current_q['category']}** (문제 #{st.session_state.current_q['id']})")
+with col_top2:
+    if st.button("🎲 다른 문제 뽑기", use_container_width=True):
+        pick_next_question()
+        st.rerun()
+
+q = st.session_state.current_q
+
+# 문제 지문 출력
+st.subheader("Q. " + q["question"])
+
+# 입력 폼
+with st.form("quiz_form"):
+    if q["type"] == "choice":
+        user_input = st.radio("정답을 선택하세요:", q["options"], index=None)
+    else:
+        user_input = st.text_input("정답을 입력하세요 (예: 숫자 또는 분수 형태):")
+
+    submit_btn = st.form_submit_button("정답 확인하기")
+    if submit_btn:
+        st.session_state.submitted = True
+        st.session_state.user_answer = user_input
+
+# 채점 및 풀이 결과 표시
+if st.session_state.submitted:
+    ans = str(st.session_state.user_answer).strip() if st.session_state.user_answer else ""
+    correct_ans = q["answer"]
+
+    is_correct = False
+    if q["type"] == "choice":
+        is_correct = (ans == correct_ans)
+    else:
+        valid_answers = [a.replace(" ", "").lower() for a in q.get("alt_answers", [correct_ans])]
+        is_correct = (ans.replace(" ", "").lower() in valid_answers)
+
+    st.markdown("---")
+    if is_correct:
+        st.success("🎉 **정답입니다! 완벽하게 이해하고 있네요.**")
+    else:
+        st.error(f"❌ **아쉽네요! 다시 확인해 보세요.**\n\n* **정답:** `{correct_ans}`")
+
+    with st.expander("📖 친절한 해설 확인하기", expanded=True):
+        st.write(q["explanation"])
