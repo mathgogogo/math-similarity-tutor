@@ -1,10 +1,10 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import numpy as np
 
-st.set_page_config(page_title="닮음 시각화 훈련소", layout="wide")
-
-# 한글 폰트 설정 (환경에 따라 기본 영문/심볼 병기)
+# 나눔고딕 폰트 적용
+plt.rcParams['font.family'] = 'NanumGothic'
 plt.rcParams['axes.unicode_minus'] = False
 
 st.title("🧩 닮음 정복 훈련: '분리해서 같은 방향으로 돌리기'")
