@@ -2,181 +2,229 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
 
-# 페이지 설정
-st.set_page_config(page_title="중2 수학: 닮음 마스터", layout="wide")
+st.set_page_config(page_title="닮음 시각화 훈련소", layout="wide")
 
-st.title("📐 중2 수학: 도형의 닮음 정복 프로젝트")
+# 한글 폰트 설정 (환경에 따라 기본 영문/심볼 병기)
+plt.rcParams['axes.unicode_minus'] = False
+
+st.title("🧩 닮음 정복 훈련: '분리해서 같은 방향으로 돌리기'")
 st.markdown("""
-닮음 문제를 풀 때 가장 중요한 것은 **‘대응점 순서를 정확히 맞추어 기호($\triangle \text{ABC} \sim \triangle \text{ADE}$)로 적는 것’**입니다!  
-그림을 분리해 같은 방향으로 놓고, 대응점을 찾아 비례식을 완성해 보세요.
+많은 학생들이 겹쳐 있거나 회전된 그림을 눈으로만 보려다 실수를 합니다.  
+가장 확실한 해결책은 **작은 삼각형을 바깥에 꺼내 큰 삼각형과 똑같은 방향으로 돌려놓는 것**입니다!
 """)
 
-# 세션 상태 초기화
-if "quiz_step" not in st.session_state:
-    st.session_state.quiz_step = 1
-
-# 유형 선택
-problem_type = st.sidebar.selectbox(
-    "유형을 선택하세요",
-    ["유형 1: 회전형 AA 닮음 (공통각 + 동위각/한 각 동일)", "유형 2: 모래시계형 (맞꼭지각 + 엇각)"]
+# 연습할 대표 유형 3가지
+st.sidebar.header("🎯 훈련 유형 선택")
+problem = st.sidebar.radio(
+    "도형 유형을 고르세요:",
+    [
+        "1. 회전형 AA 닮음 (공통각 + 한 각 동일)",
+        "2. 직각삼각형 속 직각 (소 공식 체인)",
+        "3. 맞꼭지각 모래시계형 (나비형)"
+    ]
 )
 
-# -------------------------------------------------------------
-# 유형 1: 회전형 AA 닮음
-# -------------------------------------------------------------
-if problem_type == "유형 1: 회전형 AA 닮음 (공통각 + 동위각/한 각 동일)":
-    st.subheader("💡 유형 1: 큰 삼각형 안에 뒤집혀 들어간 삼각형")
+# -----------------------------------------------------------------------------
+# 유형 1: 회전형 AA 닮음 (A 공통, 각 C = 각 ADE)
+# -----------------------------------------------------------------------------
+if problem == "1. 회전형 AA 닮음 (공통각 + 한 각 동일)":
+    st.subheader("유형 1: 큰 삼각형 안에 엇갈려 들어간 작은 삼각형")
+    st.info("💡 각 A는 공통각이고, 각 C와 크기가 같은 각(●)은 각 D입니다. 작은 삼각형을 큰 삼각형 모양(공통각이 위, ●가 오른쪽 아래)으로 정렬해 보세요.")
     
-    col1, col2 = st.columns([1, 1])
+    col_orig, col_sep = st.columns([1, 1.2])
     
-    # 도형 좌표 정의
-    # A=(2, 4), B=(0, 0), C=(6, 0)
-    # D는 AB 위 (1, 2), E는 AC 위 (4, 2)
-    # 각 ADE = 각 ACB (회전형)
-    
-    with col1:
-        st.markdown("### [문제 그림]")
-        fig, ax = plt.subplots(figsize=(5, 4))
+    with col_orig:
+        st.markdown("#### [원본 문제 도형]")
+        fig, ax = plt.subplots(figsize=(5, 4.5))
         
-        # 큰 삼각형 ABC
-        A, B, C = np.array([2, 5]), np.array([0, 0]), np.array([7, 0])
-        D = A * 0.4 + B * 0.6  # 선분 AB 위
-        E = A * 0.5 + C * 0.5  # 선분 AC 위
+        # 큰 삼각형 ABC 좌표
+        A = np.array([2.5, 5.0])
+        B = np.array([0.0, 0.0])
+        C = np.array([7.0, 0.0])
         
-        # 선 그리기
-        ax.plot([A[0], B[0], C[0], A[0]], [A[1], B[1], C[1], A[1]], 'b-', lw=2)
-        ax.plot([D[0], E[0]], [D[1], E[1]], 'r-', lw=2)
+        # 선분 AB 위 D, 선분 AC 위 E
+        D = A * 0.45 + B * 0.55
+        E = A * 0.55 + C * 0.45
         
-        # 꼭짓점 텍스트
-        ax.text(A[0], A[1]+0.2, 'A (공통각)', fontsize=12, ha='center', weight='bold')
-        ax.text(B[0]-0.3, B[1]-0.2, 'B', fontsize=12, color='blue', weight='bold')
-        ax.text(C[0]+0.2, C[1]-0.2, 'C (●)', fontsize=12, color='blue', weight='bold')
-        ax.text(D[0]-0.3, D[1]+0.1, 'D (●)', fontsize=12, color='red', weight='bold')
-        ax.text(E[0]+0.2, E[1]+0.1, 'E', fontsize=12, color='red', weight='bold')
+        # 그리기
+        ax.plot([A[0], B[0], C[0], A[0]], [A[1], B[1], C[1], A[1]], 'b-', lw=2.5)
+        ax.plot([D[0], E[0]], [D[1], E[1]], 'crimson', lw=2.5)
         
-        # 변의 길이 예시 표시
-        ax.text(1.2, 3.8, 'AD = 4', fontsize=10, color='darkgray')
-        ax.text(0.3, 1.2, 'DB = 5', fontsize=10, color='darkgray')
-        ax.text(4.8, 3.8, 'AE = 3', fontsize=10, color='darkgray')
-        ax.text(6.0, 1.2, 'EC = x', fontsize=10, color='crimson', weight='bold')
+        # 점 라벨 및 각 표시
+        ax.text(A[0], A[1] + 0.25, 'A (공통각 ★)', fontsize=12, ha='center', weight='bold')
+        ax.text(B[0] - 0.4, B[1] - 0.2, 'B', fontsize=12, weight='bold')
+        ax.text(C[0] + 0.2, C[1] - 0.2, 'C (●)', fontsize=12, color='blue', weight='bold')
+        ax.text(D[0] - 0.45, D[1] + 0.1, 'D (●)', fontsize=12, color='crimson', weight='bold')
+        ax.text(E[0] + 0.2, E[1] + 0.1, 'E', fontsize=12, color='crimson', weight='bold')
+        
+        # 변의 길이 정보
+        ax.text(1.0, 3.2, 'AD = 4', color='gray', fontsize=10)
+        ax.text(0.3, 1.0, 'DB = 5', color='gray', fontsize=10)
+        ax.text(4.5, 3.2, 'AE = 3', color='gray', fontsize=10)
+        ax.text(5.5, 1.0, 'EC = x', color='crimson', fontsize=11, weight='bold')
         
         ax.set_xlim(-1, 8)
         ax.set_ylim(-1, 6)
         ax.axis('off')
         st.pyplot(fig)
 
-    with col2:
-        st.markdown("### 🔍 시각적 힌트: '분리해서 같은 방향으로 보기'")
-        show_separated = st.checkbox("삼각형 분리해서 같은 방향으로 돌려보기")
+    with col_sep:
+        st.markdown("#### [오른쪽 여백에 분리해서 같은 방향으로 세우기]")
         
-        if show_separated:
-            fig2, (ax_big, ax_small) = plt.subplots(1, 2, figsize=(6, 3))
-            
-            # 큰 삼각형 ABC (A 위, B 왼쪽, C 오른쪽)
-            ax_big.plot([2, 0, 7, 2], [5, 0, 0, 5], 'b-', lw=2)
-            ax_big.text(2, 5.2, 'A (공통)', ha='center', weight='bold')
-            ax_big.text(-0.3, -0.3, 'B')
-            ax_big.text(7.2, -0.3, 'C (●)', weight='bold')
-            ax_big.text(0.5, 2.5, 'AB = 9')
-            ax_big.text(5.0, 2.5, 'AC = 3+x')
-            ax_big.set_title("△ABC", fontsize=11)
-            ax_big.axis('off')
-            
-            # 작은 삼각형: 대응점 순서대로 (A 위, E 왼쪽, D 오른쪽)
-            # 왜냐하면 각 D가 ●이므로 큰 삼각형의 각 C(●)와 대응!
-            ax_small.plot([1, 0, 3.5, 1], [3, 0, 0, 3], 'r-', lw=2)
-            ax_small.text(1, 3.2, 'A (공통)', ha='center', weight='bold')
-            ax_small.text(-0.3, -0.3, 'E')
-            ax_small.text(3.7, -0.3, 'D (●)', weight='bold')
-            ax_small.text(0.0, 1.5, 'AE = 3')
-            ax_small.text(2.6, 1.5, 'AD = 4')
-            ax_small.set_title("방향을 맞춘 작은 삼각형", fontsize=11, color='red')
-            ax_small.axis('off')
-            
-            st.pyplot(fig2)
-            st.success("✨ 같은 각(공통각 A, ●표시 각)을 같은 위치에 두니 대응 관계가 바로 보이죠?")
-
-    # 인터랙티브 퀴즈
-    st.markdown("---")
-    st.subheader("📝 대응점 순서 맞추기 퀴즈")
-    
-    st.write("$\triangle \text{ABC}$ 와 닮음인 삼각형의 기호를 대응점 순서에 맞게 선택하세요.")
-    
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        p1 = st.selectbox("점 A의 대응점", ["A", "D", "E"], index=0)
-    with c2:
-        p2 = st.selectbox("점 B의 대응점", ["A", "D", "E"], index=1)
-    with c3:
-        p3 = st.selectbox("점 C의 대응점", ["A", "D", "E"], index=2)
+        align_mode = st.radio(
+            "작은 삼각형의 각 꼭짓점 배치 선택:",
+            [
+                "그대로 꺼내기 (A 위, D 왼쪽, E 오른쪽)",
+                "뒤집어서 같은 방향 맞추기 (A 위, E 왼쪽, D 오른쪽)"
+            ]
+        )
         
-    ans_selected = f"△{p1}{p2}{p3}"
-    
-    if st.button("정답 확인 및 비례식 세우기"):
-        # 점 C(●)에 대응하는 점은 D(●), 점 A는 공통각이므로 A, 나머지 B는 E에 대응 -> △AED
-        if p1 == "A" and p2 == "E" and p3 == "D":
-            st.success(f"🎉 정답입니다! $\\triangle \\text{{ABC}} \\sim {ans_selected}$ (AA 닮음)")
-            st.markdown(r"""
-            **대응점 순서대로 비례식을 적으면 실수가 없습니다:**
-            $$\frac{\text{AB}}{\text{AE}} = \frac{\text{BC}}{\text{ED}} = \frac{\text{AC}}{\text{AD}}$$
-            
-            수치를 대입하면:
-            $$\frac{4 + 5}{3} = \frac{3 + x}{4} \implies \frac{9}{3} = \frac{3 + x}{4}$$
-            $$3 = \frac{3 + x}{4} \implies 12 = 3 + x \implies \mathbf{x = 9}$$
-            """)
+        fig2, (ax_L, ax_R) = plt.subplots(1, 2, figsize=(7, 3.5))
+        
+        # 왼쪽: 기준 큰 삼각형 ABC
+        ax_L.plot([2, 0, 6, 2], [4, 0, 0, 4], 'b-', lw=2.5)
+        ax_L.text(2, 4.3, 'A (★)', ha='center', weight='bold')
+        ax_L.text(-0.3, -0.3, 'B')
+        ax_L.text(6.2, -0.3, 'C (●)', color='blue', weight='bold')
+        ax_L.text(0.5, 2.0, 'AB = 9')
+        ax_L.text(4.2, 2.0, 'AC = 3+x')
+        ax_L.set_title("기준: △ABC\n(★ 위, ● 오른쪽)", fontsize=11)
+        ax_L.set_xlim(-1, 7)
+        ax_L.set_ylim(-1, 5)
+        ax_L.axis('off')
+        
+        # 오른쪽: 작은 삼각형
+        if align_mode == "그대로 꺼내기 (A 위, D 왼쪽, E 오른쪽)":
+            ax_R.plot([1.5, 0, 4, 1.5], [3, 0, 0, 3], 'gray', lw=2, linestyle='--')
+            ax_R.text(1.5, 3.3, 'A (★)', ha='center', weight='bold')
+            ax_R.text(-0.3, -0.3, 'D (●)', color='crimson', weight='bold')
+            ax_R.text(4.2, -0.3, 'E')
+            ax_R.text(0.3, 1.5, 'AD = 4')
+            ax_R.text(3.0, 1.5, 'AE = 3')
+            ax_R.set_title("❌ 아직 뒤집힌 상태\n(●의 위치가 서로 다름)", fontsize=11, color='red')
         else:
-            st.error(f"다시 확인해보세요! 선택하신 결과: $\\triangle \\text{{ABC}} \\sim {ans_selected}$")
-            st.info("💡 힌트: 각 A는 공통각이고, 표시(●)가 되어 있는 각 C의 대응점은 각 D입니다.")
+            ax_R.plot([1.5, 0, 4, 1.5], [3, 0, 0, 3], 'crimson', lw=2.5)
+            ax_R.text(1.5, 3.3, 'A (★)', ha='center', weight='bold')
+            ax_R.text(-0.3, -0.3, 'E')
+            ax_R.text(4.2, -0.3, 'D (●)', color='crimson', weight='bold')
+            ax_R.text(0.3, 1.5, 'AE = 3')
+            ax_R.text(3.0, 1.5, 'AD = 4')
+            ax_R.set_title("⭕ 완벽한 방향 정렬!\n(★ 위, ● 오른쪽 일치)", fontsize=11, color='green')
+            
+        ax_R.set_xlim(-1, 5)
+        ax_R.set_ylim(-1, 4.5)
+        ax_R.axis('off')
+        st.pyplot(fig2)
+        
+        if align_mode == "뒤집어서 같은 방향 맞추기 (A 위, E 왼쪽, D 오른쪽)":
+            st.success("대응점 순서가 완벽히 맞춰졌습니다: △ABC ∽ △AED")
+            st.latex(r"\frac{\text{AB (왼쪽)}}{\text{AE (왼쪽)}} = \frac{\text{AC (오른쪽)}}{\text{AD (오른쪽)}} \implies \frac{9}{3} = \frac{3+x}{4} \implies x = 9")
 
-# -------------------------------------------------------------
-# 유형 2: 모래시계형 닮음
-# -------------------------------------------------------------
-else:
-    st.subheader("💡 유형 2: 평행선 사이의 모래시계(나비)형 닮음")
+# -----------------------------------------------------------------------------
+# 유형 2: 직각삼각형 속 직각
+# -----------------------------------------------------------------------------
+elif problem == "2. 직각삼각형 속 직각 (소 공식 체인)":
+    st.subheader("유형 2: 직각삼각형 꼭짓점에서 내린 수선의 발 (소 공식)")
+    st.info("💡 직각(90°)과 예각 하나(●)를 기준으로, 큰 직각삼각형과 내부의 작은 직각삼각형 두 개를 모두 같은 자세(직각이 왼쪽 아래, ●가 오른쪽 아래)로 눕혀 분리해 봅니다.")
     
-    col1, col2 = st.columns([1, 1])
-    with col1:
+    col_orig, col_sep = st.columns([1, 1.2])
+    
+    with col_orig:
         fig, ax = plt.subplots(figsize=(5, 4))
-        # AB // CD
-        # O는 교점
-        A, B = np.array([-2, 3]), np.array([3, 3])
-        O = np.array([0, 1])
-        # O를 중심으로 연장
-        C = O + (O - A) * 0.7
-        D = O + (O - B) * 0.7
+        # 직각삼각형: 각 A = 90도, BC가 빗변
+        # A=(0, 2.4), B=(-3.2, 0), C=(1.8, 0) -> AB=4, AC=3, BC=5
+        A = np.array([0, 2.4])
+        B = np.array([-3.2, 0])
+        C = np.array([1.8, 0])
+        H = np.array([0, 0]) # 수선의 발
         
-        # 선분 그리기
-        ax.plot([A[0], B[0]], [A[1], B[1]], 'b-', lw=3, label="AB // CD")
-        ax.plot([D[0], C[0]], [D[1], C[1]], 'b-', lw=3)
-        ax.plot([A[0], C[0]], [A[1], C[1]], 'gray', linestyle='--')
-        ax.plot([B[0], D[0]], [B[1], D[1]], 'gray', linestyle='--')
+        ax.plot([B[0], C[0], A[0], B[0]], [B[1], C[1], A[1], B[1]], 'b-', lw=2.5)
+        ax.plot([A[0], H[0]], [A[1], H[1]], 'crimson', lw=2)
         
-        ax.text(A[0]-0.3, A[1]+0.1, 'A (●)', fontsize=11, weight='bold')
-        ax.text(B[0]+0.1, B[1]+0.1, 'B (×)', fontsize=11, weight='bold')
-        ax.text(O[0]+0.2, O[1]+0.1, 'O', fontsize=11, weight='bold')
-        ax.text(C[0]-0.3, C[1]-0.3, 'C (●)', fontsize=11, weight='bold')
-        ax.text(D[0]+0.1, D[1]-0.3, 'D (×)', fontsize=11, weight='bold')
+        ax.text(A[0], A[1] + 0.2, 'A (90°)', ha='center', weight='bold')
+        ax.text(B[0] - 0.4, B[1] - 0.2, 'B (×)', weight='bold')
+        ax.text(C[0] + 0.2, C[1] - 0.2, 'C (●)', weight='bold')
+        ax.text(H[0], H[1] - 0.35, 'H (90°)', ha='center', color='crimson', weight='bold')
         
+        ax.set_xlim(-4, 3)
+        ax.set_ylim(-1, 3.5)
         ax.axis('off')
         st.pyplot(fig)
         
-    with col2:
-        st.markdown("""
-        ### 🔍 핵심 원리: 엇각 찾기
-        * $\\text{AB} \parallel \\text{CD}$ 이므로:
-          * $\\angle \\text{OAB} = \\angle \\text{OCD}$ (엇각, ●)
-          * $\\angle \\text{OBA} = \\angle \\text{ODC}$ (엇각, $\\times$)
-          * $\\angle \\text{AOB} = \\angle \\text{COD}$ (맞꼭지각)
-        * 따라서 모래시계형은 좌우가 뒤집히는 형태의 대응을 가집니다.
-        """)
+    with col_sep:
+        st.markdown("#### [세 직각삼각형을 모두 같은 모양(자세)으로 분리]")
+        show_all = st.checkbox("3개의 직각삼각형 나란히 정렬하기", value=True)
         
-        st.markdown("---")
-        st.markdown("#### $\\triangle \\text{OAB}$ 와 닮음인 삼각형은?")
-        choice = st.radio("대응 순서가 바른 것을 고르세요:", ["△OCD", "△ODC", "△CDO"])
+        if show_all:
+            fig3, axes = plt.subplots(1, 3, figsize=(8, 2.5))
+            
+            # 모양 규격: 직각(L자)이 왼쪽 아래, ●(각 C)가 오른쪽 아래, 나머지(×)가 위쪽
+            # 1. 전체 큰 삼각형 (직각: A, 아래각: C(●), 윗각: B(×))
+            axes[0].plot([0, 4, 0, 0], [0, 0, 3, 0], 'b-', lw=2)
+            axes[0].text(-0.3, -0.4, 'A(90°)', weight='bold')
+            axes[0].text(4.0, -0.4, 'C(●)', weight='bold')
+            axes[0].text(-0.3, 3.1, 'B(×)', weight='bold')
+            axes[0].set_title("① 전체 △ABC\n(기호: △CBA)", fontsize=10)
+            axes[0].axis('off')
+            
+            # 2. 오른쪽 작은 삼각형 (직각: H, 아래각: C(●), 윗각: A(×))
+            axes[1].plot([0, 3, 0, 0], [0, 0, 2.25, 0], 'crimson', lw=2)
+            axes[1].text(-0.3, -0.4, 'H(90°)', weight='bold')
+            axes[1].text(3.0, -0.4, 'C(●)', weight='bold')
+            axes[1].text(-0.3, 2.35, 'A(×)', weight='bold')
+            axes[1].set_title("② 오른쪽 △HAC\n(기호: △CHA)", fontsize=10, color='crimson')
+            axes[1].axis('off')
+
+            # 3. 왼쪽 중간 삼각형 (직각: H, 아래각: A(●), 윗각: B(×))
+            axes[2].plot([0, 2.25, 0, 0], [0, 0, 1.7, 0], 'darkgreen', lw=2)
+            axes[2].text(-0.3, -0.4, 'H(90°)', weight='bold')
+            axes[2].text(2.25, -0.4, 'A(●)', weight='bold')
+            axes[2].text(-0.3, 1.8, 'B(×)', weight='bold')
+            axes[2].set_title("③ 왼쪽 △HBA\n(기호: △AHB)", fontsize=10, color='darkgreen')
+            axes[2].axis('off')
+            
+            st.pyplot(fig3)
+            st.success("✨ 같은 자세로 놓으면 공식($\text{AC}^2 = \text{CH} \times \text{CB}$, $\text{AH}^2 = \text{BH} \times \text{CH}$)이 눈으로 그대로 증명됩니다!")
+
+# -----------------------------------------------------------------------------
+# 유형 3: 맞꼭지각 모래시계형
+# -----------------------------------------------------------------------------
+else:
+    st.subheader("유형 3: 평행선 사이의 모래시계형 (상하/좌우 반전)")
+    st.info("💡 평행선 사이의 엇각에 의해 위쪽 삼각형과 아래쪽 삼각형은 180도 회전된 관계입니다. 아래쪽 삼각형을 180도 돌려 같은 방향으로 세워보세요.")
+    
+    col_orig, col_sep = st.columns([1, 1.2])
+    with col_orig:
+        fig, ax = plt.subplots(figsize=(5, 4))
+        # AB // CD
+        ax.plot([-2, 2.5], [2, 2], 'b-', lw=3)
+        ax.plot([-1.5, 3], [-2, -2], 'b-', lw=3)
+        ax.plot([-2, 3], [2, -2], 'gray', linestyle='--')
+        ax.plot([2.5, -1.5], [2, -2], 'gray', linestyle='--')
         
-        if st.button("확인"):
-            if choice == "△OCD":
-                st.success(r"정답입니다! $\triangle \text{OAB} \sim \triangle \text{OCD}$")
-                st.latex(r"\frac{\text{OA}}{\text{OC}} = \frac{\text{OB}}{\text{OD}} = \frac{\text{AB}}{\text{CD}}")
-            else:
-                st.error("오답입니다. 점 A(●)의 대응점은 점 C(●), 점 B(×)의 대응점은 점 D(×)입니다!")
+        ax.text(-2.3, 2.1, 'A (●)', weight='bold')
+        ax.text(2.6, 2.1, 'B (×)', weight='bold')
+        ax.text(0.1, 0.1, 'O', weight='bold')
+        ax.text(3.1, -2.2, 'D (●)', weight='bold', color='crimson')
+        ax.text(-1.8, -2.2, 'C (×)', weight='bold', color='crimson')
+        ax.axis('off')
+        st.pyplot(fig)
+        
+    with col_sep:
+        rotate = st.slider("아래 삼각형(△OCD) 회전시키기 (도):", 0, 180, 0, step=45)
+        
+        fig4, ax4 = plt.subplots(figsize=(4.5, 3))
+        # 기준 위 삼각형
+        ax4.plot([-1.5, 1.5, 0, -1.5], [1.5, 1.5, 0, 1.5], 'b-', lw=2)
+        ax4.text(-1.8, 1.6, 'A(●)')
+        ax4.text(1.6, 1.6, 'B(×)')
+        ax4.text(0, -0.3, 'O')
+        
+        # 180도 회전 시 완벽 정렬
+        if rotate == 180:
+            st.success("🎯 180도 회전 완료! 점 A(●)와 점 D(●), 점 B(×)와 점 C(×)가 일치하여 △OAB ∽ △ODC 완성!")
+        else:
+            st.warning("슬라이더를 180도까지 돌려 두 삼각형의 각 위치(●, ×)를 맞춰보세요.")
+            
+        ax4.axis('off')
+        st.pyplot(fig4)
