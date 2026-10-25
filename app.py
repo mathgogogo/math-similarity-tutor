@@ -176,4 +176,7 @@ with st.container(border=True):
 
         with c_edit:
             with st.popover("✏️"):
-                new_text = st.text_input(f"{idx+1}번 수정", value=item["text"], key=
+                new_text = st.text_input(f"{idx+1}번 수정", value=item["text"], key=f"edit_input5_{idx}")
+                if st.button("저장", key=f"btn_save5_{idx}", use_container_width=True):
+                    st.session_state.todos_5[idx]["text"] = new_text
+                    st.rerun()
