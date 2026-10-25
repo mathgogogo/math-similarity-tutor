@@ -1,31 +1,52 @@
+import json
+import os
 import streamlit as st
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="오늘 GOGO",
+    page_title="오늘의 할 일",
     page_icon="✔️",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# 2. 세션 상태 관리 (5개 할 일)
+# 2. 로컬 파일 영구 저장/불러오기 함수
+DATA_FILE = "my_todos.json"
+
+DEFAULT_TODOS = [
+    {"text": "오늘 플래너 및 일정 확인", "done": False},
+    {"text": "핵심 과제 및 복습 마무리", "done": False},
+    {"text": "집중 학습 또는 독서 30분", "done": False},
+    {"text": "수분 섭취 및 가벼운 스트레칭", "done": False},
+    {"text": "내일 우선순위 3가지 계획", "done": False},
+]
+
+def load_todos():
+    if os.path.exists(DATA_FILE):
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            return DEFAULT_TODOS
+    return DEFAULT_TODOS
+
+def save_todos(todos):
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(todos, f, ensure_ascii=False, indent=2)
+
+# 3. 세션 상태 초기화
 if "reset_count" not in st.session_state:
     st.session_state.reset_count = 0
 
 if "todos_5" not in st.session_state:
-    st.session_state.todos_5 = [
-        {"text": "오늘 플래너 및 일정 확인", "done": False},
-        {"text": "핵심 과제 및 복습 마무리", "done": False},
-        {"text": "집중 학습 또는 독서 30분", "done": False},
-        {"text": "수분 섭취 및 가벼운 스트레칭", "done": False},
-        {"text": "내일 우선순위 3가지 계획", "done": False},
-    ]
+    st.session_state.todos_5 = load_todos()
 
-# 체크박스 클릭 즉시 동기화
+# 체크박스 클릭 즉시 반영 및 파일 저장
 def toggle_todo(index, key_name):
     st.session_state.todos_5[index]["done"] = st.session_state[key_name]
+    save_todos(st.session_state.todos_5)
 
-# 3. CSS 스타일
+# 4. CSS 스타일
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
@@ -38,7 +59,6 @@ st.markdown("""
         background-color: #f8fafc;
     }
 
-    /* 본문 여백 */
     .block-container {
         padding-top: 1.8rem !important;
         padding-bottom: 1.5rem !important;
@@ -47,7 +67,6 @@ st.markdown("""
         max-width: 480px !important;
     }
 
-    /* 메인 화이트 카드 */
     [data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -64,7 +83,6 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
-    /* 게이지 바 */
     .stProgress {
         margin-top: 4px !important;
         margin-bottom: 8px !important;
@@ -74,7 +92,6 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* 가로 1줄 강제 유지 */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
@@ -86,7 +103,7 @@ st.markdown("""
         margin-bottom: 2px !important;
     }
 
-    /* 상단 헤더 전용 초기화 버튼 스타일 (잘림 방지) */
+    /* 초기화 버튼 */
     div.header-container div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child button {
         background-color: #f1f5f9 !important;
         border: 1px solid #cbd5e1 !important;
@@ -99,7 +116,7 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
-    /* 체크박스 라벨 밀착 및 줄바꿈 최적화 */
+    /* 체크박스 영역 밀착 */
     div[data-testid="stCheckbox"] {
         min-height: auto !important;
         margin-bottom: 0 !important;
@@ -117,7 +134,7 @@ st.markdown("""
         word-break: keep-all !important;
     }
 
-    /* 연필 ✏️ 버튼 미니멀 규격 */
+    /* ✏️ 연필 버튼 */
     div[data-testid="stPopover"] button {
         background-color: #f1f5f9 !important;
         border: 1px solid #e2e8f0 !important;
@@ -130,17 +147,19 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 4. 카드 렌더링
+# 5. 카드 렌더링
 with st.container(border=True):
-    # 상단 헤더: 제목 폭과 초기화 버튼 폭을 최적 배분 (잘림 방지 래퍼 적용)
+    # 상단 헤더: 타이틀과 초기화 버튼
     st.markdown('<div class="header-container">', unsafe_allow_html=True)
     col_t, col_b = st.columns([0.65, 0.35])
     with col_t:
         st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
     with col_b:
+        # ★ 초기화 버튼 클릭 시: 글자는 건드리지 않고 체크(done) 상태만 False로 변경 후 파일 저장 ★
         if st.button("🔄 초기화", key="btn_reset_header", use_container_width=True):
             for item in st.session_state.todos_5:
                 item["done"] = False
+            save_todos(st.session_state.todos_5)  # 바뀐 체크 해제 상태 저장
             st.session_state.reset_count += 1
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
@@ -172,6 +191,8 @@ with st.container(border=True):
         with c_edit:
             with st.popover("✏️"):
                 new_text = st.text_input(f"{idx+1}번 수정", value=item["text"], key=f"edit_input5_{idx}")
+                # ★ 저장 버튼 클릭 시: 수정된 텍스트를 파일에 영구 기록 ★
                 if st.button("저장", key=f"btn_save5_{idx}", use_container_width=True):
                     st.session_state.todos_5[idx]["text"] = new_text
+                    save_todos(st.session_state.todos_5)
                     st.rerun()
