@@ -20,7 +20,7 @@ DEFAULT_DATA = {
         {"text": "팔굽혀펴기 20개", "done": False},
         {"text": "스쿼트 50개", "done": False},
         {"text": "유머 ai대화", "done": False},
-        {"text": "내일 우선순위 3가지 계획", "done": False},
+        {"text": "휴대폰 감옥 1시간", "done": False},
     ]
 }
 
@@ -64,10 +64,10 @@ st.markdown("""
         background-color: #f8fafc;
     }
 
-    /* 화면 최상단 여백을 극소화하여 한 화면에 전부 수납 */
+    /* 최상단 여백 최소화 */
     .block-container {
         padding-top: 1.0rem !important;
-        padding-bottom: 1.0rem !important;
+        padding-bottom: 0.8rem !important;
         padding-left: 0.6rem !important;
         padding-right: 0.6rem !important;
         max-width: 440px !important;
@@ -78,11 +78,11 @@ st.markdown("""
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 14px !important;
-        padding: 12px 10px !important;
+        padding: 10px 10px !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
     }
 
-    /* 제목 줄바꿈 방지 */
+    /* 타이틀 */
     .modern-title {
         font-size: 1.15rem;
         font-weight: 700;
@@ -91,38 +91,31 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
-    /* ★ 누적 완료 배지 팝오버 버튼 스타일 (클릭 가능 디자인) ★ */
-    .count-badge-popover button {
-        display: inline-flex !important;
-        align-items: center !important;
-        background-color: #eff6ff !important;
-        color: #1d4ed8 !important;
-        border: 1px solid #dbeafe !important;
-        font-size: 0.78rem !important;
-        font-weight: 700 !important;
-        padding: 2px 9px !important;
-        border-radius: 12px !important;
-        height: 26px !important;
-        min-height: 26px !important;
+    /* 누적 완료 가로 배지 */
+    .count-badge {
+        display: inline-flex;
+        align-items: center;
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #dbeafe;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 10px;
         white-space: nowrap !important;
-        box-shadow: none !important;
-    }
-    .count-badge-popover button:hover {
-        background-color: #dbeafe !important;
-        border-color: #bfdbfe !important;
     }
 
-    /* 프로그레스 게이지 바 */
+    /* 프로그레스 바 */
     .stProgress {
         margin-top: 2px !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
     }
     .stProgress > div > div > div > div {
         background-color: #3b82f6 !important;
         border-radius: 6px !important;
     }
 
-    /* ★ 모바일 강제 줄바꿈(wrap) 전면 해제 (가로 1줄 강제) ★ */
+    /* 가로 1줄 강제 유지 */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
@@ -134,20 +127,20 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
 
-    /* 좌측 체크박스 칸 너비 */
+    /* 좌측 칸 */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
         flex: 1 1 auto !important;
         min-width: 0 !important;
     }
 
-    /* 우측 연필 버튼 칸 너비 고정 */
+    /* 우측 버튼 칸 */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
         flex: 0 0 34px !important;
         min-width: 34px !important;
         max-width: 34px !important;
     }
 
-    /* 체크박스 영역 공백 및 높이 최소화 */
+    /* 체크박스 정렬 및 밀착 */
     div[data-testid="stCheckbox"] {
         min-height: auto !important;
         margin-bottom: 0 !important;
@@ -156,35 +149,36 @@ st.markdown("""
         display: flex !important;
         align-items: center !important;
         gap: 6px !important;
-        padding: 2px 0 !important;
+        padding: 1px 0 !important;
         margin: 0 !important;
     }
     div[data-testid="stCheckbox"] label p {
-        font-size: 0.90rem !important;
+        font-size: 0.88rem !important;
         margin: 0 !important;
         line-height: 1.25 !important;
         word-break: keep-all !important;
     }
 
-    /* 연필 ✏️ 버튼 미니멀 아이콘 규격 */
-    div[data-testid="stPopover"]:not(.count-badge-popover div[data-testid="stPopover"]) button {
+    /* 연필 & 설정 팝오버 버튼 */
+    div[data-testid="stPopover"] button {
         background-color: #f1f5f9 !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 6px !important;
         padding: 0 !important;
         width: 30px !important;
-        height: 28px !important;
-        min-height: 28px !important;
+        height: 26px !important;
+        min-height: 26px !important;
+        font-size: 0.75rem !important;
     }
 
-    /* 상단 초기화 버튼 규격 */
+    /* 상단 초기화 버튼 */
     .header-reset-btn button {
         background-color: #f1f5f9 !important;
         border: 1px solid #cbd5e1 !important;
         color: #475569 !important;
         border-radius: 6px !important;
-        padding: 1px 7px !important;
-        font-size: 0.78rem !important;
+        padding: 1px 6px !important;
+        font-size: 0.75rem !important;
         font-weight: 600 !important;
         height: 26px !important;
         min-height: 26px !important;
@@ -196,12 +190,12 @@ st.markdown("""
         background-color: #2563eb !important;
         color: #ffffff !important;
         font-weight: 600 !important;
-        font-size: 0.92rem !important;
+        font-size: 0.90rem !important;
         border-radius: 8px !important;
         border: none !important;
-        height: 38px !important;
-        min-height: 38px !important;
-        margin-top: 4px !important;
+        height: 36px !important;
+        min-height: 36px !important;
+        margin-top: 2px !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -222,31 +216,26 @@ with st.container(border=True):
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 누적 완료 클릭 시 수정 가능한 팝오버 배지
+    # 누적 완료 배지 + 우측 설정 ⚙️ 버튼
+    col_cnt, col_set = st.columns([0.88, 0.12])
     count = st.session_state.app_data.get("completion_count", 0)
-    st.markdown('<div class="count-badge-popover">', unsafe_allow_html=True)
-    with st.popover(f"🏆 누적 완료: {count} / 100"):
-        st.caption("누적 완료 횟수 직접 수정")
-        new_count = st.number_input(
-            "횟수 입력",
-            min_value=0,
-            max_value=1000,
-            value=int(count),
-            step=1,
-            key="input_direct_count"
-        )
-        if st.button("횟수 저장", key="btn_save_count", use_container_width=True):
-            st.session_state.app_data["completion_count"] = int(new_count)
-            save_data(st.session_state.app_data)
-            st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    with col_cnt:
+        st.markdown(f'<div class="count-badge">🏆 누적 완료: {count} / 100</div>', unsafe_allow_html=True)
+    with col_set:
+        with st.popover("⚙️"):
+            st.caption("누적 횟수 직접 수정")
+            new_cnt = st.number_input("횟수", min_value=0, max_value=1000, value=int(count), step=1, key="num_cnt")
+            if st.button("저장", key="btn_cnt_save", use_container_width=True):
+                st.session_state.app_data["completion_count"] = int(new_cnt)
+                save_data(st.session_state.app_data)
+                st.rerun()
 
-    # 5개 기준 진행률 바
+    # 진행률 바
     completed = sum(1 for t in st.session_state.app_data["todos"] if t["done"])
     progress = completed / 5.0
     st.progress(progress, text=f"완료 {completed} / 5개 ({int(progress * 100)}%)")
 
-    # 5개 체크리스트 목록 (무조건 가로 1줄 고정)
+    # 5개 체크리스트 목록
     for idx, item in enumerate(st.session_state.app_data["todos"]):
         c_item, c_edit = st.columns([0.88, 0.12])
         chk_key = f"chk5_{st.session_state.reset_count}_{idx}"
@@ -273,7 +262,7 @@ with st.container(border=True):
                     save_data(st.session_state.app_data)
                     st.rerun()
 
-    # 하단: 오늘 완료 및 자동 초기화 버튼
+    # 하단 오늘 완료 버튼
     st.markdown('<div class="finish-btn-wrap">', unsafe_allow_html=True)
     if st.button("🎉 오늘 할 일 완료!", key="btn_finish_today", use_container_width=True):
         st.session_state.app_data["completion_count"] = st.session_state.app_data.get("completion_count", 0) + 1
