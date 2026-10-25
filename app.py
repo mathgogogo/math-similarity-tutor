@@ -2,7 +2,7 @@ import streamlit as st
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="오늘의 할 일",
+    page_title="오늘 GOGO",
     page_icon="✔️",
     layout="centered",
     initial_sidebar_state="collapsed"
