@@ -8,29 +8,24 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. 세션 상태 관리
+# 2. 세션 상태 관리 (5개 할 일)
 if "reset_count" not in st.session_state:
     st.session_state.reset_count = 0
 
-if "todos" not in st.session_state:
-    st.session_state.todos = [
+if "todos_5" not in st.session_state:
+    st.session_state.todos_5 = [
         {"text": "오늘 플래너 및 일정 확인", "done": False},
         {"text": "핵심 과제 및 복습 마무리", "done": False},
         {"text": "집중 학습 또는 독서 30분", "done": False},
         {"text": "수분 섭취 및 가벼운 스트레칭", "done": False},
-        {"text": "필요한 물품 및 준비물 챙기기", "done": False},
-        {"text": "중요 연락 및 메일 회신", "done": False},
-        {"text": "책상 및 주변 환경 정돈", "done": False},
-        {"text": "하루 성과 3가지 기록", "done": False},
-        {"text": "마음 정리 및 휴식 시간 갖기", "done": False},
         {"text": "내일 우선순위 3가지 계획", "done": False},
     ]
 
 # 체크박스 클릭 즉시 상태 동기화
 def toggle_todo(index, key_name):
-    st.session_state.todos[index]["done"] = st.session_state[key_name]
+    st.session_state.todos_5[index]["done"] = st.session_state[key_name]
 
-# 3. 핵심 CSS: 모바일 및 좁은 해상도 강제 1줄 배치 (No-wrap)
+# 3. CSS 스타일 (모바일 1줄 유지 & 헤더 정렬)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
@@ -43,7 +38,7 @@ st.markdown("""
         background-color: #f8fafc;
     }
 
-    /* 상단 여백 확보 및 모바일 좌우 여백 최적화 */
+    /* 상단 여백 및 모바일 여백 */
     .block-container {
         padding-top: 2.8rem !important;
         padding-bottom: 2.5rem !important;
@@ -61,52 +56,52 @@ st.markdown("""
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
     }
 
+    /* 상단 타이틀 폰트 */
     .modern-title {
         font-size: 1.35rem;
         font-weight: 700;
         color: #0f172a;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
+        margin: 0;
+        letter-spacing: -0.5px;
     }
 
+    /* 게이지 바 색상 */
     .stProgress > div > div > div > div {
         background-color: #3b82f6 !important;
         border-radius: 8px !important;
     }
 
-    /* ★★★ 모바일에서 컬럼이 밑으로 떨어지는 것 방지 ★★★ */
+    /* 모바일 가로 1줄 고정 (No-wrap) */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important; /* 절대 줄바꿈 되지 않음 */
+        flex-wrap: nowrap !important;
         align-items: center !important;
         gap: 8px !important;
         margin-bottom: 4px !important;
     }
 
-    /* 체크박스 영역 고정 너비 및 여백 축소 */
+    /* 체크박스 영역 너비 고정 */
     div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
         flex: 0 0 28px !important;
         min-width: 28px !important;
         width: 28px !important;
     }
 
-    /* 텍스트 영역 유연한 확장 */
+    /* 할 일 텍스트 영역 */
     div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
         flex: 1 1 auto !important;
         min-width: 0 !important;
     }
 
-    /* 수정 버튼 영역 고정 너비 */
+    /* ✏️ 수정 버튼 영역 */
     div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
         flex: 0 0 38px !important;
         min-width: 38px !important;
         width: 38px !important;
     }
 
-    /* 수정 팝오버 버튼 미니멀 아이콘 스타일 */
+    /* 팝오버 ✏️ 버튼 스타일 */
     button[kind="secondary"] {
         background-color: #f1f5f9 !important;
         color: #475569 !important;
@@ -124,18 +119,29 @@ st.markdown("""
 
 # 4. 카드 렌더링
 with st.container(border=True):
-    st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
+    # 상단: '오늘의 할 일' 타이틀과 우측 '초기화' 버튼
+    col_title, col_reset = st.columns([0.72, 0.28])
+    with col_title:
+        st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
+    with col_reset:
+        if st.button("🔄 초기화", use_container_width=True):
+            for item in st.session_state.todos_5:
+                item["done"] = False
+            st.session_state.reset_count += 1
+            st.rerun()
 
-    # 진행률 게이지
-    completed = sum(1 for t in st.session_state.todos if t["done"])
-    progress = completed / 10.0
-    st.progress(progress, text=f"완료 {completed} / 10개 ({int(progress * 100)}%)")
     st.write("")
 
-    # 10개 체크리스트 목록
-    for idx, item in enumerate(st.session_state.todos):
+    # 실시간 진행률 게이지 계산 (5개 기준)
+    completed = sum(1 for t in st.session_state.todos_5 if t["done"])
+    progress = completed / 5.0
+    st.progress(progress, text=f"완료 {completed} / 5개 ({int(progress * 100)}%)")
+    st.write("")
+
+    # 5개 체크리스트 목록
+    for idx, item in enumerate(st.session_state.todos_5):
         c_chk, c_txt, c_pop = st.columns([1, 8, 1])
-        chk_key = f"chk_{st.session_state.reset_count}_{idx}"
+        chk_key = f"chk5_{st.session_state.reset_count}_{idx}"
         
         with c_chk:
             st.checkbox(
@@ -149,23 +155,13 @@ with st.container(border=True):
 
         with c_txt:
             if item["done"]:
-                st.markdown(f"<div style='color:#94a3b8; text-decoration:line-through; font-size:0.92rem; word-break:keep-all; line-height:1.35;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color:#94a3b8; text-decoration:line-through; font-size:0.95rem; word-break:keep-all; line-height:1.35;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
             else:
-                st.markdown(f"<div style='color:#1e293b; font-weight:500; font-size:0.92rem; word-break:keep-all; line-height:1.35;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color:#1e293b; font-weight:500; font-size:0.95rem; word-break:keep-all; line-height:1.35;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
 
         with c_pop:
-            # 좁은 화면에서도 차지하지 않도록 아이콘(✏️) 단독 표시
             with st.popover("✏️"):
-                new_text = st.text_input(f"{idx+1}번 수정", value=item["text"], key=f"edit_input_{idx}")
-                if st.button("저장", key=f"btn_save_{idx}", use_container_width=True):
-                    st.session_state.todos[idx]["text"] = new_text
+                new_text = st.text_input(f"{idx+1}번 수정", value=item["text"], key=f"edit_input5_{idx}")
+                if st.button("저장", key=f"btn_save5_{idx}", use_container_width=True):
+                    st.session_state.todos_5[idx]["text"] = new_text
                     st.rerun()
-
-    st.write("")
-    
-    # 체크 표시 전체 초기화 버튼
-    if st.button("🔄 체크 표시 전체 초기화", use_container_width=True):
-        for item in st.session_state.todos:
-            item["done"] = False
-        st.session_state.reset_count += 1
-        st.rerun()
