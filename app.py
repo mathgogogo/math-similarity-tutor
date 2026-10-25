@@ -5,7 +5,7 @@ import streamlit as st
 # 1. 페이지 기본 설정
 st.set_page_config(
     page_title="오늘도 건강해지자!",
-    page_icon="💪",
+    page_icon="✔️",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
@@ -64,7 +64,7 @@ st.markdown("""
         background-color: #f8fafc;
     }
 
-    /* 본문 상하 여백 압축 */
+    /* 화면 최상단 여백을 극소화하여 한 화면에 전부 수납 */
     .block-container {
         padding-top: 1.0rem !important;
         padding-bottom: 1.0rem !important;
@@ -73,7 +73,7 @@ st.markdown("""
         max-width: 440px !important;
     }
 
-    /* 메인 카드 */
+    /* 메인 카드 여백 축소 */
     [data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
@@ -82,7 +82,7 @@ st.markdown("""
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
     }
 
-    /* 타이틀 */
+    /* 제목 줄바꿈 방지 */
     .modern-title {
         font-size: 1.15rem;
         font-weight: 700;
@@ -91,21 +91,21 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
-    /* 목표 달성 누적 배지 */
+    /* 목표 달성 누적 배지 (3 / 100) */
     .count-badge {
         display: inline-flex;
         align-items: center;
         background-color: #eff6ff;
         color: #1d4ed8;
         border: 1px solid #dbeafe;
-        font-size: 0.80rem;
+        font-size: 0.78rem;
         font-weight: 700;
-        padding: 2px 8px;
+        padding: 2px 7px;
         border-radius: 12px;
         white-space: nowrap !important;
     }
 
-    /* 프로그레스 바 */
+    /* 프로그레스 게이지 바 */
     .stProgress {
         margin-top: 2px !important;
         margin-bottom: 4px !important;
@@ -115,7 +115,7 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* 가로 1줄 고정 */
+    /* ★ 모바일 강제 줄바꿈(wrap) 전면 해제 (가로 1줄 강제) ★ */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
@@ -127,20 +127,20 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
 
-    /* 좌측 칸 */
+    /* 좌측 체크박스 칸 너비 */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
         flex: 1 1 auto !important;
         min-width: 0 !important;
     }
 
-    /* 우측 버튼 칸 */
+    /* 우측 연필 버튼 칸 너비 고정 */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
         flex: 0 0 34px !important;
         min-width: 34px !important;
         max-width: 34px !important;
     }
 
-    /* 체크박스 정렬 및 밀착 */
+    /* 체크박스 영역 공백 및 높이 최소화 */
     div[data-testid="stCheckbox"] {
         min-height: auto !important;
         margin-bottom: 0 !important;
@@ -159,7 +159,7 @@ st.markdown("""
         word-break: keep-all !important;
     }
 
-    /* 연필 ✏️ 버튼 */
+    /* 연필 ✏️ 버튼 미니멀 아이콘 규격 */
     div[data-testid="stPopover"] button {
         background-color: #f1f5f9 !important;
         border: 1px solid #e2e8f0 !important;
@@ -184,21 +184,7 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
-    /* 카운트 관리 팝오버 버튼 */
-    .count-manage-btn button {
-        background-color: #eff6ff !important;
-        border: 1px solid #bfdbfe !important;
-        color: #1d4ed8 !important;
-        border-radius: 6px !important;
-        padding: 0 6px !important;
-        font-size: 0.75rem !important;
-        font-weight: 600 !important;
-        height: 24px !important;
-        min-height: 24px !important;
-        width: auto !important;
-    }
-
-    /* 하단 오늘 완료 버튼 */
+    /* 하단 완료 버튼 */
     .finish-btn-wrap button {
         background-color: #2563eb !important;
         color: #ffffff !important;
@@ -215,10 +201,10 @@ st.markdown("""
 
 # 5. 메인 카드 렌더링
 with st.container(border=True):
-    # 상단 1줄: "오늘도 건강해지자!" 제목 + 체크 초기화 버튼
+    # 상단 1줄: 제목 + 초기화 버튼
     col_t, col_r = st.columns([0.76, 0.24])
     with col_t:
-        st.markdown('<div class="modern-title">✔️ 오늘도 건강해지자!</div>', unsafe_allow_html=True)
+        st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
     with col_r:
         st.markdown('<div class="header-reset-btn">', unsafe_allow_html=True)
         if st.button("🔄 초기화", key="btn_reset_header"):
@@ -229,34 +215,16 @@ with st.container(border=True):
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 누적 완료 배지 및 카운트 관리 (낮추기/초기화)
-    col_badge, col_cnt_opt = st.columns([0.75, 0.25])
-    with col_badge:
-        count = st.session_state.app_data.get("completion_count", 0)
-        st.markdown(f'<div class="count-badge">🏆 누적 완료: {count} / 100</div>', unsafe_allow_html=True)
-    with col_cnt_opt:
-        st.markdown('<div class="count-manage-btn">', unsafe_allow_html=True)
-        with st.popover("⚙️ 관리"):
-            st.caption("누적 횟수 조정")
-            # 1회 낮추기 버튼
-            if st.button("➖ 1회 낮추기", key="btn_minus_count", use_container_width=True):
-                if st.session_state.app_data.get("completion_count", 0) > 0:
-                    st.session_state.app_data["completion_count"] -= 1
-                    save_data(st.session_state.app_data)
-                    st.rerun()
-            # 0으로 완전 초기화 버튼
-            if st.button("🔄 0으로 리셋", key="btn_reset_count_zero", use_container_width=True):
-                st.session_state.app_data["completion_count"] = 0
-                save_data(st.session_state.app_data)
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+    # 누적 완료 N / 100 배지 표시
+    count = st.session_state.app_data.get("completion_count", 0)
+    st.markdown(f'<div class="count-badge">🏆 누적 완료: {count} / 100</div>', unsafe_allow_html=True)
 
     # 5개 기준 진행률 바
-    completed = sum(1 for t in st.session_state.todos if t["done"]) if "todos" in st.session_state.app_data else sum(1 for t in st.session_state.app_data["todos"] if t["done"])
+    completed = sum(1 for t in st.session_state.app_data["todos"] if t["done"])
     progress = completed / 5.0
     st.progress(progress, text=f"완료 {completed} / 5개 ({int(progress * 100)}%)")
 
-    # 5개 체크리스트 목록
+    # 5개 체크리스트 목록 (무조건 가로 1줄 고정)
     for idx, item in enumerate(st.session_state.app_data["todos"]):
         c_item, c_edit = st.columns([0.88, 0.12])
         chk_key = f"chk5_{st.session_state.reset_count}_{idx}"
