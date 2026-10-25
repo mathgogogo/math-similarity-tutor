@@ -25,7 +25,7 @@ if "todos_5" not in st.session_state:
 def toggle_todo(index, key_name):
     st.session_state.todos_5[index]["done"] = st.session_state[key_name]
 
-# 3. CSS 스타일: 모바일 줄바꿈 강제 방지 (1줄 유지 핵심)
+# 3. CSS 스타일: 체크박스와 글자 사이 불필요한 공백 완전 제거
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
@@ -38,24 +38,25 @@ st.markdown("""
         background-color: #f8fafc;
     }
 
-    /* 상하좌우 여백 */
+    /* 본문 여백 */
     .block-container {
         padding-top: 2.5rem !important;
         padding-bottom: 2rem !important;
-        padding-left: 0.8rem !important;
-        padding-right: 0.8rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
         max-width: 520px !important;
     }
 
-    /* 메인 카드 */
+    /* 화이트 카드 */
     [data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 18px !important;
-        padding: 18px 14px !important;
+        padding: 20px 16px !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
     }
 
+    /* 상단 타이틀 */
     .modern-title {
         font-size: 1.3rem;
         font-weight: 700;
@@ -64,48 +65,55 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
+    /* 진행 바 */
     .stProgress > div > div > div > div {
         background-color: #3b82f6 !important;
         border-radius: 8px !important;
     }
 
-    /* ★ 핵심: Streamlit의 모든 모바일 세로 꺾임(flex-direction: column)을 1줄(row)로 강제 고정 ★ */
-    div[data-testid="stHorizontalBlock"] {
+    /* ★★★ 할 일 리스트 행 레이아웃 (공백 밀착 고정) ★★★ */
+    .todo-row {
+        margin-bottom: 2px !important;
+    }
+    
+    .todo-row div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
-        gap: 6px !important;
+        justify-content: flex-start !important;
+        gap: 0px !important; /* 내부 빈틈 제거 */
         width: 100% !important;
-        margin-bottom: 2px !important;
     }
 
-    /* 1. 체크박스 칸: 딱 들어맞게 폭 32px 고정 */
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1) {
-        width: 32px !important;
-        min-width: 32px !important;
-        max-width: 32px !important;
-        flex: 0 0 32px !important;
+    /* 1. 체크박스 칸: 딱 체크박스 크기(34px)만 차지하고 우측으로 늘어나지 않음 */
+    .todo-row div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1) {
+        width: 34px !important;
+        min-width: 34px !important;
+        max-width: 34px !important;
+        flex: 0 0 34px !important;
+        margin-right: 4px !important;
     }
 
-    /* 2. 할 일 텍스트 칸: 남은 가로 공간을 채움 */
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
-        width: auto !important;
+    /* 2. 할 일 내용 칸: 체크박스 바로 옆에서 남은 공간을 차지 */
+    .todo-row div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
         flex: 1 1 auto !important;
         min-width: 0 !important;
+        width: calc(100% - 80px) !important;
     }
 
-    /* 3. 수정 버튼 칸: 폭 40px 고정 */
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
-        width: 40px !important;
-        min-width: 40px !important;
-        max-width: 40px !important;
-        flex: 0 0 40px !important;
+    /* 3. 연필 버튼 칸: 우측 끝 고정 (38px) */
+    .todo-row div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) {
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
+        flex: 0 0 38px !important;
+        margin-left: 4px !important;
     }
 
-    /* 팝오버 연필 버튼 여백 축소 */
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) button {
-        padding: 2px 0 !important;
+    /* 연필 팝오버 버튼 규격 */
+    .todo-row div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(3) button {
+        padding: 0 !important;
         width: 36px !important;
         height: 32px !important;
         min-height: 32px !important;
@@ -113,36 +121,21 @@ st.markdown("""
         background-color: #f1f5f9 !important;
         border: 1px solid #e2e8f0 !important;
     }
-
-    /* 상단 헤더 전용(제목/초기화버튼) 컬럼 비율 복원 */
-    div.header-row > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(1) {
-        flex: 1 1 auto !important;
-        width: auto !important;
-        max-width: none !important;
-    }
-    div.header-row > div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:nth-child(2) {
-        flex: 0 0 76px !important;
-        width: 76px !important;
-        min-width: 76px !important;
-        max-width: 76px !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # 4. 카드 렌더링
 with st.container(border=True):
-    # 상단 헤더 (제목 + 초기화 버튼)
-    st.markdown('<div class="header-row">', unsafe_allow_html=True)
-    h_col1, h_col2 = st.columns([0.75, 0.25])
-    with h_col1:
+    # 상단 헤더: 타이틀과 초기화 버튼
+    col_t, col_b = st.columns([0.72, 0.28])
+    with col_t:
         st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
-    with h_col2:
-        if st.button("🔄 초기화", key="btn_reset_all", use_container_width=True):
+    with col_b:
+        if st.button("🔄 초기화", key="btn_reset_header", use_container_width=True):
             for item in st.session_state.todos_5:
                 item["done"] = False
             st.session_state.reset_count += 1
             st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
     st.write("")
 
@@ -154,8 +147,9 @@ with st.container(border=True):
 
     # 5개 체크리스트 목록
     for idx, item in enumerate(st.session_state.todos_5):
-        # 컬럼 3개 생성 (1: 체크박스, 2: 텍스트, 3: 수정)
-        c_chk, c_txt, c_pop = st.columns([1, 8, 1])
+        # 행 전용 래퍼로 감싸서 공백을 밀착시킴
+        st.markdown(f'<div class="todo-row">', unsafe_allow_html=True)
+        c_chk, c_txt, c_pop = st.columns([1, 10, 1])
         chk_key = f"chk5_{st.session_state.reset_count}_{idx}"
         
         with c_chk:
@@ -170,9 +164,9 @@ with st.container(border=True):
 
         with c_txt:
             if item["done"]:
-                st.markdown(f"<div style='color:#94a3b8; text-decoration:line-through; font-size:0.94rem; line-height:1.3;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color:#94a3b8; text-decoration:line-through; font-size:0.95rem; line-height:1.35; padding-left:2px;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
             else:
-                st.markdown(f"<div style='color:#1e293b; font-weight:500; font-size:0.94rem; line-height:1.3;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='color:#1e293b; font-weight:500; font-size:0.95rem; line-height:1.35; padding-left:2px;'>{idx+1}. {item['text']}</div>", unsafe_allow_html=True)
 
         with c_pop:
             with st.popover("✏️"):
@@ -180,3 +174,4 @@ with st.container(border=True):
                 if st.button("저장", key=f"btn_save5_{idx}", use_container_width=True):
                     st.session_state.todos_5[idx]["text"] = new_text
                     st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
