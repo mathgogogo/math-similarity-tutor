@@ -25,7 +25,7 @@ if "todos_5" not in st.session_state:
 def toggle_todo(index, key_name):
     st.session_state.todos_5[index]["done"] = st.session_state[key_name]
 
-# 3. CSS 스타일 (모바일 1줄 유지 & 헤더 정렬)
+# 3. CSS 스타일 (상단 헤더와 체크리스트 행 완벽 분리)
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
@@ -52,16 +52,24 @@ st.markdown("""
         background-color: #ffffff !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 18px !important;
-        padding: 20px 16px !important;
+        padding: 22px 18px !important;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
     }
 
-    /* 상단 타이틀 폰트 */
+    /* 상단 헤더 컨테이너: 가로 정렬 & 줄바꿈 절대 방지 */
+    .header-box {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
     .modern-title {
         font-size: 1.35rem;
         font-weight: 700;
         color: #0f172a;
-        margin: 0;
+        white-space: nowrap !important; /* 가로 한 줄 강제 */
         letter-spacing: -0.5px;
     }
 
@@ -71,8 +79,8 @@ st.markdown("""
         border-radius: 8px !important;
     }
 
-    /* 모바일 가로 1줄 고정 (No-wrap) */
-    div[data-testid="stHorizontalBlock"] {
+    /* ★★★ 체크리스트 목록 영역만 가로 1줄 고정 적용 ★★★ */
+    div[data-testid="stVerticalBlock"] > div.element-container:has(.todo-item-marker) + div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -81,21 +89,21 @@ st.markdown("""
         margin-bottom: 4px !important;
     }
 
-    /* 체크박스 영역 너비 고정 */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
+    /* 체크박스 고정 너비 */
+    div[data-testid="stVerticalBlock"] > div.element-container:has(.todo-item-marker) + div[data-testid="stHorizontalBlock"] > div:nth-child(1) {
         flex: 0 0 28px !important;
         min-width: 28px !important;
         width: 28px !important;
     }
 
-    /* 할 일 텍스트 영역 */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
+    /* 할 일 텍스트 가변 확장 */
+    div[data-testid="stVerticalBlock"] > div.element-container:has(.todo-item-marker) + div[data-testid="stHorizontalBlock"] > div:nth-child(2) {
         flex: 1 1 auto !important;
         min-width: 0 !important;
     }
 
-    /* ✏️ 수정 버튼 영역 */
-    div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
+    /* 수정 버튼 고정 너비 */
+    div[data-testid="stVerticalBlock"] > div.element-container:has(.todo-item-marker) + div[data-testid="stHorizontalBlock"] > div:nth-child(3) {
         flex: 0 0 38px !important;
         min-width: 38px !important;
         width: 38px !important;
@@ -119,8 +127,8 @@ st.markdown("""
 
 # 4. 카드 렌더링
 with st.container(border=True):
-    # 상단: '오늘의 할 일' 타이틀과 우측 '초기화' 버튼
-    col_title, col_reset = st.columns([0.72, 0.28])
+    # 상단: 가로 한 줄로 완벽 고정된 헤더와 우측 초기화 버튼
+    col_title, col_reset = st.columns([0.7, 0.3])
     with col_title:
         st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
     with col_reset:
@@ -132,7 +140,7 @@ with st.container(border=True):
 
     st.write("")
 
-    # 실시간 진행률 게이지 계산 (5개 기준)
+    # 실시간 진행률 게이지 계산
     completed = sum(1 for t in st.session_state.todos_5 if t["done"])
     progress = completed / 5.0
     st.progress(progress, text=f"완료 {completed} / 5개 ({int(progress * 100)}%)")
@@ -140,6 +148,9 @@ with st.container(border=True):
 
     # 5개 체크리스트 목록
     for idx, item in enumerate(st.session_state.todos_5):
+        # 체크리스트 행 전용 마커 (상단 헤더에 영향을 주지 않도록 구분)
+        st.markdown('<div class="todo-item-marker" style="display:none;"></div>', unsafe_allow_html=True)
+        
         c_chk, c_txt, c_pop = st.columns([1, 8, 1])
         chk_key = f"chk5_{st.session_state.reset_count}_{idx}"
         
