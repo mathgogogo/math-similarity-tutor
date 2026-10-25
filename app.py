@@ -1,144 +1,104 @@
+import datetime
+import urllib.parse
+import requests
 import streamlit as st
-import matplotlib.pyplot as plt
-import random
 
-st.set_page_config(page_title="중2 수학 | 도형의 닮음 퀴즈", page_icon="📐", layout="centered")
+# 페이지 기본 설정
+st.set_page_config(
+    page_title="나만의 일일 대시보드",
+    page_icon="☀️",
+    layout="wide"
+)
 
-# --- 도형 그리기 함수 모음 ---
-def draw_fig_parallel_triangle(x_label="x cm", b_len="3 cm", bc_len="4 cm", de_len="7 cm"):
-    fig, ax = plt.subplots(figsize=(4, 3))
-    A, D, E = [2.5, 4], [0.5, 0.5], [4.5, 0.5]
-    r = 0.55
-    B = [A[0]*(1-r) + D[0]*r, A[1]*(1-r) + D[1]*r]
-    C = [A[0]*(1-r) + E[0]*r, A[1]*(1-r) + E[1]*r]
+# ----------------- 세션 상태 (할 일 5개 초기화) -----------------
+if "todos" not in st.session_state:
+    st.session_state.todos = [
+        {"text": "수업 지도안 검토하기", "done": False},
+        {"text": "주요 뉴스 및 증시 확인", "done": False},
+        {"text": "스트레칭 및 가벼운 운동", "done": False},
+        {"text": "하루 감사한 일 3가지 적기", "done": False},
+        {"text": "내일 계획 10분 정리", "done": False},
+    ]
 
-    ax.plot([A[0], D[0], E[0], A[0]], [A[1], D[1], E[1], A[1]], 'k-', lw=2)
-    ax.plot([B[0], C[0]], [B[1], C[1]], 'b-', lw=2)
+# ----------------- 상단: 시간 & 날씨 위젯 -----------------
+col_time, col_weather = st.columns([1.5, 1])
 
-    ax.text(A[0], A[1]+0.2, 'A', fontsize=12, ha='center', weight='bold')
-    ax.text(B[0]-0.25, B[1], 'B', fontsize=12, ha='right', weight='bold')
-    ax.text(C[0]+0.25, C[1], 'C', fontsize=12, ha='left', weight='bold')
-    ax.text(D[0]-0.2, D[1]-0.25, 'D', fontsize=12, ha='center', weight='bold')
-    ax.text(E[0]+0.2, E[1]-0.25, 'E', fontsize=12, ha='center', weight='bold')
+with col_time:
+    now = datetime.datetime.now()
+    days = ["월요일", "화요일", "수요일", "목요일", "금요일", "토요일", "일요일"]
+    day_str = days[now.weekday()]
+    st.subheader(f"📅 {now.strftime('%Y년 %m월 %d일')} ({day_str})")
+    st.markdown(f"### ⏰ 현재 시각 : **{now.strftime('%H:%M')}**")
 
-    ax.text((A[0]+B[0])/2 - 0.25, (A[1]+B[1])/2, b_len, color='crimson', fontsize=10)
-    ax.text((B[0]+D[0])/2 - 0.25, (B[1]+D[1])/2, x_label, color='crimson', fontsize=10)
-    ax.text((B[0]+C[0])/2, B[1]+0.15, bc_len, color='blue', fontsize=10, ha='center')
-    ax.text((D[0]+E[0])/2, D[1]-0.25, de_len, color='blue', fontsize=10, ha='center')
+with col_weather:
+    st.subheader("🌤️ 오늘의 날씨")
+    try:
+        # Open-Meteo 무료 API (창원 기준 위경도: 35.228, 128.681)
+        url = "https://api.open-meteo.com/v1/forecast?latitude=35.228&longitude=128.681&current_weather=true"
+        res = requests.get(url, timeout=3).json()
+        current = res.get("current_weather", {})
+        temp = current.get("temperature", "--")
+        wind = current.get("windspeed", "--")
+        st.write(f"📍 **현재 기온:** `{temp}°C` | **풍속:** `{wind} km/h`")
+    except Exception:
+        st.caption("날씨 정보를 불러오는 중입니다.")
 
-    ax.set_xlim(-0.2, 5.2)
-    ax.set_ylim(0, 4.5)
-    ax.axis('off')
-    return fig
-
-def draw_fig_right_triangle():
-    fig, ax = plt.subplots(figsize=(4.5, 2.5))
-    B, C, A, D = [0.5, 0.5], [4.5, 0.5], [0.5, 2.5], [4.5, 3.5]
-    # 교점 P
-    # AC: y - 0.5 = (2.0/-4.0)(x - 4.5) -> y = -0.5x + 2.75
-    # BD: y - 0.5 = (3.0/4.0)(x - 0.5)  -> y = 0.75x + 0.125
-    # 1.25x = 2.625 -> x = 2.1, y = 1.7
-    P = [2.1, 1.7]
-    H = [2.1, 0.5]
-
-    ax.plot([B[0], C[0]], [B[1], C[1]], 'k-', lw=2)
-    ax.plot([B[0], A[0]], [B[1], A[1]], 'k-', lw=2)
-    ax.plot([C[0], D[0]], [C[1], D[1]], 'k-', lw=2)
-    ax.plot([A[0], C[0]], [A[1], C[1]], 'gray', lw=1.5, ls='--')
-    ax.plot([B[0], D[0]], [B[1], D[1]], 'gray', lw=1.5, ls='--')
-    ax.plot([P[0], H[0]], [P[1], H[1]], 'red', lw=2)
-
-    ax.text(A[0]-0.2, A[1], 'A (8cm)', color='crimson', fontsize=10, ha='right', weight='bold')
-    ax.text(D[0]+0.2, D[1], 'D (12cm)', color='crimson', fontsize=10, ha='left', weight='bold')
-    ax.text(B[0]-0.15, B[1]-0.2, 'B', fontsize=11, weight='bold')
-    ax.text(C[0]+0.15, C[1]-0.2, 'C', fontsize=11, weight='bold')
-    ax.text(H[0], H[1]-0.25, 'H', fontsize=11, weight='bold')
-    ax.text(P[0], P[1]+0.15, 'P', fontsize=11, weight='bold')
-
-    ax.set_xlim(-0.8, 5.8)
-    ax.set_ylim(0, 4.0)
-    ax.axis('off')
-    return fig
-
-# --- 문제 데이터베이스 (그림 함수 연동) ---
-QUESTIONS = [
-    {
-        "id": 4,
-        "type": "choice",
-        "category": "평행선과 선분의 비",
-        "question": "아래 그림에서 BC // DE일 때, x의 값은?",
-        "draw_func": draw_fig_parallel_triangle,
-        "options": ["① 2", "② 9/4", "③ 15/4", "④ 9/2", "⑤ 14/3"],
-        "answer": "② 9/4",
-        "explanation": "AB : AD = BC : DE 이므로 3 : (3 + x) = 4 : 7 입니다.\n4(3 + x) = 21  ==>  12 + 4x = 21  ==>  4x = 9  ==>  x = 9/4"
-    },
-    {
-        "id": 9,
-        "type": "choice",
-        "category": "직각삼각형의 닮음 응용",
-        "question": "아래 그림에서 AB ⊥ BC, DC ⊥ BC, PH ⊥ BC일 때, 선분 PH의 길이는?",
-        "draw_func": draw_fig_right_triangle,
-        "options": ["① 3.2 cm", "② 4.8 cm", "③ 5.9 cm", "④ 6.1 cm", "⑤ 7.2 cm"],
-        "answer": "② 4.8 cm",
-        "explanation": "1/PH = 1/AB + 1/CD 공식에 의해,\n1/PH = 1/8 + 1/12 = 5/24  ==>  PH = 24/5 = 4.8 cm입니다."
-    },
-    {
-        "id": 1,
-        "type": "choice",
-        "category": "항상 닮은 도형",
-        "question": "다음 중에서 항상 서로 닮음인 도형은?",
-        "draw_func": None,
-        "options": ["① 두 삼각형", "② 두 원기둥", "③ 두 직사각형", "④ 두 삼각뿔", "⑤ 두 정오각형"],
-        "answer": "⑤ 두 정오각형",
-        "explanation": "변의 개수가 같은 정다각형(정오각형 등)이나 모든 원, 구, 정다면체는 항상 서로 닮은 도형입니다."
-    }
-]
-
-# --- 상태 관리 ---
-if "current_q" not in st.session_state:
-    st.session_state.current_q = random.choice(QUESTIONS)
-    st.session_state.submitted = False
-    st.session_state.user_answer = None
-
-def pick_next():
-    st.session_state.current_q = random.choice(QUESTIONS)
-    st.session_state.submitted = False
-    st.session_state.user_answer = None
-
-# --- UI 레이아웃 ---
-st.title("📐 중2 수학: 도형의 닮음 퀴즈")
-st.caption("그림과 함께 푸는 도형 문제")
 st.divider()
 
-col1, col2 = st.columns([3, 1])
-with col1:
-    st.markdown(f"**[유형] {st.session_state.current_q['category']}**")
-with col2:
-    if st.button("🎲 다른 문제", use_container_width=True):
-        pick_next()
+# ----------------- 중앙: 듀얼 포털 검색 -----------------
+st.subheader("🔍 빠른 포털 검색")
+col_engine, col_input = st.columns([1, 4])
+
+with col_engine:
+    search_engine = st.radio("검색 포털 선택", ["구글 (Google)", "네이버 (Naver)"], horizontal=True)
+
+with col_input:
+    query = st.text_input("검색어를 입력하고 엔터를 치거나 검색 버튼을 누르세요", key="search_query")
+    if query:
+        encoded_query = urllib.parse.quote(query)
+        if "구글" in search_engine:
+            target_url = f"https://www.google.com/search?q={encoded_query}"
+        else:
+            target_url = f"https://search.naver.com/search.naver?query={encoded_query}"
+        
+        st.markdown(f"👉 **[선택한 포털에서 '{query}' 검색 결과 열기]({target_url})**")
+
+st.divider()
+
+# ----------------- 하단: 오늘의 할 일 5개 (수정 & 체크) -----------------
+completed_count = sum(1 for item in st.session_state.todos if item["done"])
+progress = completed_count / 5.0
+
+st.subheader("🎯 오늘의 핵심 할 일 (TOP 5)")
+st.progress(progress, text=f"진행도: {completed_count}/5 완료 ({int(progress * 100)}%)")
+
+# 할 일 체크박스 및 인라인 수정 아코디언
+for idx, item in enumerate(st.session_state.todos):
+    cols = st.columns([0.1, 0.7, 0.2])
+    with cols[0]:
+        # 완료 체크박스
+        is_done = st.checkbox("", value=item["done"], key=f"check_{idx}")
+        st.session_state.todos[idx]["done"] = is_done
+    
+    with cols[1]:
+        # 텍스트 표시 (완료 시 취소선)
+        if item["done"]:
+            st.markdown(f"~~{item['text']}~~")
+        else:
+            st.write(item["text"])
+            
+    with cols[2]:
+        # 바로 수정할 수 있는 드롭다운
+        with st.popover("✏️ 수정"):
+            new_text = st.text_input("할 일 내용", value=item["text"], key=f"edit_input_{idx}")
+            if st.button("저장", key=f"save_btn_{idx}"):
+                st.session_state.todos[idx]["text"] = new_text
+                st.rerun()
+
+st.write("")
+col_b1, _ = st.columns([1, 4])
+with col_b1:
+    if st.button("🔄 체크 상태 초기화"):
+        for item in st.session_state.todos:
+            item["done"] = False
         st.rerun()
-
-q = st.session_state.current_q
-st.subheader("Q. " + q["question"])
-
-# 그림이 연결되어 있으면 화면에 출력
-if q.get("draw_func"):
-    fig = q["draw_func"]()
-    st.pyplot(fig)
-    plt.close(fig)
-
-with st.form("quiz_form"):
-    user_input = st.radio("정답 선택:", q["options"], index=None)
-    submit = st.form_submit_button("정답 확인")
-    if submit:
-        st.session_state.submitted = True
-        st.session_state.user_answer = user_input
-
-if st.session_state.submitted:
-    st.markdown("---")
-    if st.session_state.user_answer == q["answer"]:
-        st.success("🎉 **정답입니다!**")
-    else:
-        st.error(f"❌ **틀렸습니다.** 정답: `{q['answer']}`")
-    with st.expander("📖 해설 보기", expanded=True):
-        st.write(q["explanation"])
