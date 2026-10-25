@@ -84,7 +84,7 @@ st.markdown("""
     }
 
     .stProgress {
-        margin-top: 4px !important;
+        margin-top: 6px !important;
         margin-bottom: 8px !important;
     }
     .stProgress > div > div > div > div {
@@ -92,7 +92,51 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    div[data-testid="stHorizontalBlock"] {
+    /* ★★★ 제목 바로 옆에 초기화 버튼 밀착시키는 헤더 스타일 ★★★ */
+    .title-wrapper {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .title-wrapper div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .title-wrapper div[data-testid="column"]:nth-child(1) {
+        flex: 0 0 auto !important;
+        width: auto !important;
+    }
+
+    .title-wrapper div[data-testid="column"]:nth-child(2) {
+        flex: 0 0 auto !important;
+        width: auto !important;
+    }
+
+    .title-wrapper button {
+        background-color: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+        border-radius: 8px !important;
+        padding: 2px 10px !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        white-space: nowrap !important;
+    }
+
+    /* 체크리스트 행 가로 1줄 고정 */
+    div[data-testid="stVerticalBlock"] > div.element-container + div[data-testid="stHorizontalBlock"]:not(.title-wrapper div) {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
@@ -101,19 +145,6 @@ st.markdown("""
         gap: 6px !important;
         width: 100% !important;
         margin-bottom: 2px !important;
-    }
-
-    /* 초기화 버튼 */
-    div.header-container div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child button {
-        background-color: #f1f5f9 !important;
-        border: 1px solid #cbd5e1 !important;
-        color: #334155 !important;
-        border-radius: 8px !important;
-        padding: 2px 8px !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        height: 32px !important;
-        white-space: nowrap !important;
     }
 
     /* 체크박스 영역 밀착 */
@@ -149,17 +180,16 @@ st.markdown("""
 
 # 5. 카드 렌더링
 with st.container(border=True):
-    # 상단 헤더: 타이틀과 초기화 버튼
-    st.markdown('<div class="header-container">', unsafe_allow_html=True)
-    col_t, col_b = st.columns([0.65, 0.35])
-    with col_t:
+    # 상단 헤더: "오늘의 할 일" 제목 바로 우측에 초기화 버튼 밀착
+    st.markdown('<div class="title-wrapper">', unsafe_allow_html=True)
+    c_title, c_btn = st.columns([0.01, 0.99])
+    with c_title:
         st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
-    with col_b:
-        # ★ 초기화 버튼 클릭 시: 글자는 건드리지 않고 체크(done) 상태만 False로 변경 후 파일 저장 ★
-        if st.button("🔄 초기화", key="btn_reset_header", use_container_width=True):
+    with c_btn:
+        if st.button("🔄 초기화", key="btn_reset_header"):
             for item in st.session_state.todos_5:
                 item["done"] = False
-            save_todos(st.session_state.todos_5)  # 바뀐 체크 해제 상태 저장
+            save_todos(st.session_state.todos_5)
             st.session_state.reset_count += 1
             st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
@@ -191,7 +221,6 @@ with st.container(border=True):
         with c_edit:
             with st.popover("✏️"):
                 new_text = st.text_input(f"{idx+1}번 수정", value=item["text"], key=f"edit_input5_{idx}")
-                # ★ 저장 버튼 클릭 시: 수정된 텍스트를 파일에 영구 기록 ★
                 if st.button("저장", key=f"btn_save5_{idx}", use_container_width=True):
                     st.session_state.todos_5[idx]["text"] = new_text
                     save_todos(st.session_state.todos_5)
