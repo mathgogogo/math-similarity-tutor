@@ -4,7 +4,7 @@ import streamlit as st
 
 # 1. 페이지 기본 설정
 st.set_page_config(
-    page_title="오늘도 건강해지자!",
+    page_title="오늘의 할 일",
     page_icon="✔️",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -91,18 +91,25 @@ st.markdown("""
         white-space: nowrap !important;
     }
 
-    /* 목표 달성 누적 배지 (3 / 100) */
-    .count-badge {
-        display: inline-flex;
-        align-items: center;
-        background-color: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #dbeafe;
-        font-size: 0.78rem;
-        font-weight: 700;
-        padding: 2px 7px;
-        border-radius: 12px;
+    /* ★ 누적 완료 배지 팝오버 버튼 스타일 (클릭 가능 디자인) ★ */
+    .count-badge-popover button {
+        display: inline-flex !important;
+        align-items: center !important;
+        background-color: #eff6ff !important;
+        color: #1d4ed8 !important;
+        border: 1px solid #dbeafe !important;
+        font-size: 0.78rem !important;
+        font-weight: 700 !important;
+        padding: 2px 9px !important;
+        border-radius: 12px !important;
+        height: 26px !important;
+        min-height: 26px !important;
         white-space: nowrap !important;
+        box-shadow: none !important;
+    }
+    .count-badge-popover button:hover {
+        background-color: #dbeafe !important;
+        border-color: #bfdbfe !important;
     }
 
     /* 프로그레스 게이지 바 */
@@ -160,7 +167,7 @@ st.markdown("""
     }
 
     /* 연필 ✏️ 버튼 미니멀 아이콘 규격 */
-    div[data-testid="stPopover"] button {
+    div[data-testid="stPopover"]:not(.count-badge-popover div[data-testid="stPopover"]) button {
         background-color: #f1f5f9 !important;
         border: 1px solid #e2e8f0 !important;
         border-radius: 6px !important;
@@ -215,9 +222,24 @@ with st.container(border=True):
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # 누적 완료 N / 100 배지 표시
+    # 누적 완료 클릭 시 수정 가능한 팝오버 배지
     count = st.session_state.app_data.get("completion_count", 0)
-    st.markdown(f'<div class="count-badge">🏆 누적 완료: {count} / 100</div>', unsafe_allow_html=True)
+    st.markdown('<div class="count-badge-popover">', unsafe_allow_html=True)
+    with st.popover(f"🏆 누적 완료: {count} / 100"):
+        st.caption("누적 완료 횟수 직접 수정")
+        new_count = st.number_input(
+            "횟수 입력",
+            min_value=0,
+            max_value=1000,
+            value=int(count),
+            step=1,
+            key="input_direct_count"
+        )
+        if st.button("횟수 저장", key="btn_save_count", use_container_width=True):
+            st.session_state.app_data["completion_count"] = int(new_count)
+            save_data(st.session_state.app_data)
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # 5개 기준 진행률 바
     completed = sum(1 for t in st.session_state.app_data["todos"] if t["done"])
