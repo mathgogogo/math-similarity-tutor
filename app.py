@@ -25,7 +25,7 @@ if "todos_5" not in st.session_state:
 def toggle_todo(index, key_name):
     st.session_state.todos_5[index]["done"] = st.session_state[key_name]
 
-# 3. CSS 스타일: 모바일 1줄 고정 & 불필요한 위아래 여백 압축
+# 3. CSS 스타일
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap');
@@ -38,7 +38,7 @@ st.markdown("""
         background-color: #f8fafc;
     }
 
-    /* 상단 여백을 컴팩트하게 조정하여 스크롤 방지 */
+    /* 본문 여백 */
     .block-container {
         padding-top: 1.8rem !important;
         padding-bottom: 1.5rem !important;
@@ -66,7 +66,7 @@ st.markdown("""
 
     /* 게이지 바 */
     .stProgress {
-        margin-top: -6px !important;
+        margin-top: 4px !important;
         margin-bottom: 8px !important;
     }
     .stProgress > div > div > div > div {
@@ -74,30 +74,32 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* 모바일 세로 꺾임 방지 (무조건 가로 1줄 유지) */
+    /* 가로 1줄 강제 유지 */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         align-items: center !important;
+        justify-content: space-between !important;
         gap: 6px !important;
         width: 100% !important;
         margin-bottom: 2px !important;
     }
 
-    /* 좌측 체크박스+텍스트 영역 */
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
+    /* 상단 헤더 전용 초기화 버튼 스타일 (잘림 방지) */
+    div.header-container div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child button {
+        background-color: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #334155 !important;
+        border-radius: 8px !important;
+        padding: 2px 8px !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        height: 32px !important;
+        white-space: nowrap !important;
     }
 
-    /* 우측 버튼 영역 (초기화 및 연필 버튼) */
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
-        flex: 0 0 auto !important;
-        width: auto !important;
-    }
-
-    /* 체크박스와 글자 사이의 불필요한 빈틈 제거 및 정렬 */
+    /* 체크박스 라벨 밀착 및 줄바꿈 최적화 */
     div[data-testid="stCheckbox"] {
         min-height: auto !important;
         margin-bottom: 0 !important;
@@ -125,41 +127,34 @@ st.markdown("""
         height: 32px !important;
         min-height: 32px !important;
     }
-
-    /* 초기화 버튼 */
-    #btn_reset_header {
-        border-radius: 8px !important;
-        padding: 3px 10px !important;
-        font-size: 0.85rem !important;
-        height: 32px !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
 # 4. 카드 렌더링
 with st.container(border=True):
-    # 상단 헤더: 타이틀과 초기화 버튼 (한 줄 나란히 배치)
-    col_t, col_b = st.columns([0.72, 0.28])
+    # 상단 헤더: 제목 폭과 초기화 버튼 폭을 최적 배분 (잘림 방지 래퍼 적용)
+    st.markdown('<div class="header-container">', unsafe_allow_html=True)
+    col_t, col_b = st.columns([0.65, 0.35])
     with col_t:
         st.markdown('<div class="modern-title">✔️ 오늘의 할 일</div>', unsafe_allow_html=True)
     with col_b:
-        if st.button("🔄 초기화", key="btn_reset_header"):
+        if st.button("🔄 초기화", key="btn_reset_header", use_container_width=True):
             for item in st.session_state.todos_5:
                 item["done"] = False
             st.session_state.reset_count += 1
             st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # 실시간 진행률 게이지 (5개 기준)
     completed = sum(1 for t in st.session_state.todos_5 if t["done"])
     progress = completed / 5.0
     st.progress(progress, text=f"완료 {completed} / 5개 ({int(progress * 100)}%)")
 
-    # 5개 체크리스트 목록 (각각 가로 1줄로 고정)
+    # 5개 체크리스트 목록
     for idx, item in enumerate(st.session_state.todos_5):
         c_item, c_edit = st.columns([0.88, 0.12])
         chk_key = f"chk5_{st.session_state.reset_count}_{idx}"
         
-        # 완료 시 취소선 및 슬레이트 그레이 색상 적용
         if item["done"]:
             label_text = f"~:gray[{idx+1}. {item['text']}]~"
         else:
